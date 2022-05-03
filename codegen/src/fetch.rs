@@ -1,11 +1,15 @@
 //We need functions to get the webpage, parse it and dump the instructions in yaml format
-use std::io::{stdout, Write};
 use curl::easy::Easy;
 use log::{info, trace, debug, warn, error};
 use scraper::{Html,Selector};
+use scraper::element_ref::ElementRef;
 //use serde::{Serialize,Deserialize};
 
 use crate::options::{Time,Instruction};
+
+fn parse_table(x: ElementRef) {
+
+}
 
 pub fn fetch(url: String, fname: String) -> Result <(),String>  {
    
@@ -36,10 +40,16 @@ pub fn fetch(url: String, fname: String) -> Result <(),String>  {
     let mut tables = document.select(&selector);
     //parse one by one
     //let mut inst = Vec::new();
-    
-    if let Some(table) = tables.next() {
-        //inst.extend(table);
+    while let Some(x) = tables.next()  {
+        parse_table(x);
+
     }
+    
+
+    
+    // if let Some(table) = tables.next() {
+    //     //inst.extend(table);
+    // }
 
     Ok(())     
 

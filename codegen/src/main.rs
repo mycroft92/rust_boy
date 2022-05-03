@@ -37,6 +37,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     //Copy paste this stuff when you need to enable both console and file logging
 
     log::info!("Hello, world!");
+    //Run the fetch
     fetch::fetch(cli.url, cli.out)?;
     Ok(())
 }

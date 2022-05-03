@@ -2,6 +2,7 @@
 use std::io::{stdout, Write};
 use curl::easy::Easy;
 use log::{info, trace, debug, warn, error};
+use scraper::{Html,Selector};
 //use serde::{Serialize,Deserialize};
 
 use crate::options::{Time,Instruction};
@@ -26,11 +27,22 @@ pub fn fetch(url: Option<String>, fname: Option<String>) -> Result <(),String>  
     };
     
 
-    let doc = String::from_utf8(buf).map_err(|e| e.to_string())?;
+    let html = String::from_utf8(buf).map_err(|e| e.to_string())?;
     debug!("[-]Output webpage:");
-    debug!("{}",doc);
+    debug!("{}",html);
 
-    Ok(())
-     
+    
+    let document = Html::parse_document(&html);
+    let selector = Selector::parse("table").map_err(|_e| {"Selecting tables failed"})?;
+    //select the tables
+    let mut tables = document.select(&selector);
+    //parse one by one
+    let mut inst = Vec::new();
+    
+    if let Some(table) = tables.next() {
+        inst.extend(table);
+    }
+
+    Ok(())     
 
 }

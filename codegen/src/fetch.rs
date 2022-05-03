@@ -7,12 +7,9 @@ use scraper::{Html,Selector};
 
 use crate::options::{Time,Instruction};
 
-pub fn fetch(url: Option<String>, fname: Option<String>) -> Result <(),String>  {
+pub fn fetch(url: String, fname: String) -> Result <(),String>  {
    
     let mut buf = Vec::new();
-
-    let url  = url.unwrap_or(String::from("https://www.pastraiser.com/cpu/gameboy/gameboy_opcodes.html"));
-    let fname: String = fname.unwrap_or(String::from("instruction_list.json"));
 
     debug!("[-]Running fetch with url:{} and file:{}", url, fname);
     let mut page = Easy::new();
@@ -35,12 +32,13 @@ pub fn fetch(url: Option<String>, fname: Option<String>) -> Result <(),String>  
     let document = Html::parse_document(&html);
     let selector = Selector::parse("table").map_err(|_e| {"Selecting tables failed"})?;
     //select the tables
+   
     let mut tables = document.select(&selector);
     //parse one by one
-    let mut inst = Vec::new();
+    //let mut inst = Vec::new();
     
     if let Some(table) = tables.next() {
-        inst.extend(table);
+        //inst.extend(table);
     }
 
     Ok(())     

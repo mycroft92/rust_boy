@@ -39,13 +39,3 @@ pub struct CMDArgs {
     #[clap(long, short)]
     pub debug: bool
 }
-
-//Builder API but I like derive API more
-// pub fn parse_opts () {
-//     let matches = App::new("CodeGenner")
-//         .version("0.1.0")
-//         .author("Mycroft92 <madhukar.yerraguntla@gmail.com>")
-//         .about()
-//         .arg();
-
-// }

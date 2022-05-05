@@ -6,8 +6,11 @@ use scraper::element_ref::ElementRef;
 //use serde::{Serialize,Deserialize};
 
 use std::collections::HashMap;
-
 use crate::options::{Time,Instruction};
+use pest::Parser;
+#[derive(Parser)]
+#[grammar = "inst_grammar.pest"]
+pub struct InstParser;
 
 
 lazy_static! {

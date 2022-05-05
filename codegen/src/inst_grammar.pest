@@ -1,9 +1,5 @@
-Z = { "Z" | "z" }
+FLAGS = {"Z" | "H" | "N" | "C" | "-" | "1" | "0" }
 
-N = { "N" | "n" }
+SPACE = _{"&nbsp;"| " "}
 
-H = { "H" | "h" }
-
-C = { "C" | "c" }
-
-OPERATOR = A
+NEWLINE = _{"<br>"}

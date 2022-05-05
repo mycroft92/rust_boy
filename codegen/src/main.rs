@@ -1,17 +1,26 @@
+
+
+#[macro_use]
+extern crate lazy_static;
+extern crate pest;
+#[macro_use]
+extern crate pest_derive;
+
 use serde;
 use serde_yaml;
 use std::error::Error;
 use clap::Parser; // seems to be needed for arg parsing
-mod fetch;
-mod options;
-
-//Setting up logging with log4rs
 use log::LevelFilter;
 use log4rs::append::console::ConsoleAppender;
 use log4rs::append::file::FileAppender;
 use log4rs::encode::pattern::PatternEncoder;
 use log4rs::config::{Appender, Config, Root};
 use log4rs::filter::threshold::ThresholdFilter;
+
+mod fetch;
+mod options;
+//Setting up logging with log4rs
+
 
 fn main() -> Result<(), Box<dyn Error>> {
     let cli = crate::options::CMDArgs::parse();

@@ -5,9 +5,38 @@ use scraper::{Html,Selector};
 use scraper::element_ref::ElementRef;
 //use serde::{Serialize,Deserialize};
 
+use std::collections::HashMap;
+
 use crate::options::{Time,Instruction};
 
-fn parse_table(x: ElementRef) {
+
+lazy_static! {
+    //color to instruction operand size
+    static ref INSTR_HASH: HashMap<&'static str, usize> = {
+        let mut m = HashMap::new();
+        m.insert("#ff99cc",0);
+        m.insert("#ffcc99",0);
+        m.insert("#ccccff",8);
+        m.insert("#ccffcc",16);
+        m.insert("#ffff99",8);
+        m.insert("#ffcccc",16);
+        m.insert("#80ffff",8);
+        m
+    };
+    static ref COUNT: usize = INSTR_HASH.len();
+
+}
+
+fn parse_table(table: ElementRef) {
+    println!("Entry for 0 in hash is {}",INSTR_HASH.get("#ffcc99").unwrap());
+
+    let td_selector = Selector::parse("td").expect("Unable to find data in tables!");
+    let mut tds     = table.select(&td_selector); 
+    
+    while let Some(td) = tds.next() {
+        println!("{:?} {}",td.value().attr("bgcolor"),td.inner_html());
+    }
+
 
 }
 
@@ -50,7 +79,6 @@ pub fn fetch(url: String, fname: String) -> Result <(),String>  {
     // if let Some(table) = tables.next() {
     //     //inst.extend(table);
     // }
-
     Ok(())     
 
 }

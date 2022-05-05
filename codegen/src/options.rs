@@ -2,6 +2,7 @@ use serde::{Deserialize,Serialize};
 //use serde_derive::{Serialize, Deserialize};
 use clap::Parser;
 
+
 #[derive(Debug, Serialize, Deserialize)]
 //#[serde(untagged)]
 pub enum Time {
@@ -11,11 +12,11 @@ pub enum Time {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Instruction {
-    pub val: u16,
-    pub operator: String,
-    pub operands: Vec<String>,
-    pub instr_bits: usize, //0/8/16
-    pub instr_size: usize,
+    pub val: u16,          //opcode in int
+    pub operator: String,  //opcode in String 
+    pub operands: Vec<String>, //operands list
+    pub instr_size: usize, //0/8/16
+    pub instr_operand_size: usize,
     pub time: Time,
     pub z: String,
     pub n: String,

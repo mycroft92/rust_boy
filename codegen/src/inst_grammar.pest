@@ -1,5 +1,3 @@
 FLAGS = {"Z" | "H" | "N" | "C" | "-" | "1" | "0" }
-
 SPACE = _{"&nbsp;"| " "}
-
 NEWLINE = _{"<br>"}

@@ -1,8 +1,8 @@
 #[macro_use]
 extern crate lazy_static;
-extern crate pest;
-#[macro_use]
-extern crate pest_derive;
+// extern crate pest;
+// #[macro_use]
+// extern crate pest_derive;
 
 use serde;
 use serde_yaml;
@@ -17,6 +17,7 @@ use log4rs::filter::threshold::ThresholdFilter;
 
 mod fetch;
 mod options;
+pub mod inst_parser;
 //Setting up logging with log4rs
 
 

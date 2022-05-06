@@ -4,6 +4,7 @@ use clap::Parser;
 
 
 #[derive(Debug, Serialize, Deserialize)]
+#[derive(PartialEq, Eq, Clone, Copy)]
 //#[serde(untagged)]
 pub enum Time {
     One(usize),
@@ -11,6 +12,7 @@ pub enum Time {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[derive(PartialEq, Eq, Clone)]
 pub struct Instruction {
     pub val: u16,          //opcode in int
     pub operator: String,  //opcode in String 

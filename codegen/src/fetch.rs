@@ -1,4 +1,5 @@
-//We need functions to get the webpage, parse it and dump the instructions in yaml format
+//! # Fetch module
+//! We need functions to get the webpage, parse it and dump the instructions in yaml format
 use curl::easy::Easy;
 use log::{info, trace, debug, warn, error};
 use scraper::{Html,Selector};
@@ -7,10 +8,12 @@ use scraper::element_ref::ElementRef;
 
 use std::collections::HashMap;
 use crate::options::{Time,Instruction};
-use pest::Parser;
-#[derive(Parser)]
-#[grammar = "inst_grammar.pest"]
-pub struct InstParser;
+
+
+// use pest::Parser;
+// #[derive(Parser)]
+// #[grammar = "inst_grammar.pest"]
+// pub struct InstParser;
 
 
 lazy_static! {
@@ -43,7 +46,10 @@ fn parse_table(table: ElementRef) {
 
 }
 
+
+
 pub fn fetch(url: String, fname: String) -> Result <(),String>  {
+    //! `fetch`'s test comment [url] variable
    
     let mut buf = Vec::new();
 

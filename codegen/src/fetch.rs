@@ -7,7 +7,7 @@ use scraper::element_ref::ElementRef;
 //use serde::{Serialize,Deserialize};
 
 use std::collections::HashMap;
-use crate::options::{Time,Instruction};
+
 
 
 // use pest::Parser;
@@ -33,16 +33,17 @@ lazy_static! {
 
 }
 
-fn parse_table(table: ElementRef) {
+fn parse_table(table: ElementRef) -> Result<(),String> {
     println!("Entry for 0 in hash is {}",INSTR_HASH.get("#ffcc99").unwrap());
 
-    let td_selector = Selector::parse("td").expect("Unable to find data in tables!");
+    let td_selector = Selector::parse("td").map_err(|_e| {"Unable to find data in tables!"})?;
     let mut tds     = table.select(&td_selector); 
     
     while let Some(td) = tds.next() {
         println!("{:?} {}",td.value().attr("bgcolor"),td.inner_html());
     }
 
+    Ok(())
 
 }
 

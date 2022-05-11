@@ -82,7 +82,6 @@ fn parse_time(i: &str) -> Res<&str,Time> {
 // }
 
 fn parse_flags(i: &str) -> Res<&str, Flags> {
-    let is_flag = |c: char| {(c == 'Z') || (c == 'H') || (c == 'N') || (c == 'C') || (c == '1') || (c=='0') || (c == '-')};
     let flag_sp = delimited(multispace0 ,one_of("ZNHC10-"), multispace1);
     
     let (i,o) = many_m_n(3, 3, terminated(flag_sp, multispace0))(i)?;

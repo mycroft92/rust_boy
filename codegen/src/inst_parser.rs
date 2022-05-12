@@ -24,6 +24,7 @@ pub enum Time {
 #[derive(PartialEq, Eq, Clone)]
 pub struct Instruction {
     pub val: u16,          //opcode in int
+    pub val_hex: String,      //opcode in hex
     pub operator: String,  //opcode in String 
     pub operands: Vec<String>, //operands list
     pub instr_size: usize, //0/8/16
@@ -111,6 +112,7 @@ pub fn parse_data (i:&str, code: u16, operand_size: usize) -> Res<&str, Instruct
     let (i, ((inst,ops),_,(s,t),_,(z,n,h,c)) ) = all_consuming(tuple((parse_inst,parse_nl,parse_timeline,parse_nl,parse_flags)))(i)?;
     let data = Instruction {
         val: code,
+        val_hex: String::from(format!("{:#x}",code)),
         operator: inst,
         operands: ops,
         instr_size: s,
@@ -208,6 +210,7 @@ mod tests {
                 instr_operand_size: 8,
                 instr_size: 3,
                 val: 5,
+                val_hex: String::from(format!("{:#x}",5)),
                 operator: String::from("LD"),
                 operands: vec! [String::from("DE"), String::from("d16")]
             }))

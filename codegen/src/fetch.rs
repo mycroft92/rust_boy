@@ -5,6 +5,8 @@ use curl::easy::Easy;
 use log::{info, debug};
 use scraper::{Html,Selector};
 use scraper::element_ref::ElementRef;
+use std::fs::File;
+use std::io::prelude::*;
 //use serde::{Serialize,Deserialize};
 
 use std::collections::HashMap;
@@ -56,9 +58,7 @@ fn parse_table(table: ElementRef, op_prefix: u16) -> Result<Vec<Instruction>,Str
         
         
     }
-
     Ok(out)
-
 }
 
 
@@ -90,11 +90,17 @@ pub fn fetch(url: String, fname: String) -> Result <(),String>  {
     //select the tables
    
     let mut tables = document.select(&selector);
+    let mut insts = Vec::new();
 
-    let table1 = parse_table(tables.next().expect("No tables found!"), 0x0).map_err(|e| e.to_string())?; 
-    let table2 = parse_table(tables.next().expect("No tables found!"), 0xCB).map_err(|e| e.to_string())?; 
-    debug!("Table1: \n{:?}",table1);
-    debug!("Table2: \n{:?}",table2);
+    insts.extend(parse_table(tables.next().expect("No tables found!"), 0x0).map_err(|e| e.to_string())?); 
+    insts.extend(parse_table(tables.next().expect("No tables found!"), 0xCB).map_err(|e| e.to_string())?); 
+  
+
+    let serialized = serde_yaml::to_string(&insts).expect("Fudge packing failed");
+    info!("Serialized: {}",serialized);
+    
+    let mut file = File::create(fname).map_err(|e| e.to_string())?;
+    file.write_all(serialized.as_bytes()).map_err(|e| e.to_string())?;
 
     Ok(())     
 

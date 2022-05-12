@@ -12,7 +12,25 @@ use std::io::prelude::*;
 use std::collections::HashMap;
 use crate::inst_parser::{Instruction, parse_data};
 
+lazy_static! {
+    static ref ALT: HashMap<&'static str, &'static str> = {
+        let mut m = HashMap::new();
+        m.insert("LD A,(C)", "LD A,(FF00h+C)");
+        m.insert("LD (C),A", "LD (FF00h+C),A");
+        m.insert("LDH A,(a8)", "LD A,(FF00h+a8)");
+        m.insert("LDH (a8),A", "LD (FF00h+a8),A");
+        m.insert("LD A,(HL+)", "LDI A,(HL)");
+        m.insert("LD (HL+),A", "LDI (HL),A");
+        m.insert("LD A,(HL-)", "LDD A,(HL)");
+        m.insert("LD (HL-),A", "LDD (HL),A");
+        m.insert("LD HL,SP+r8", "LDHL SP,r8");
+        m
+    };
+}
 
+fn alter(s: &str) -> String {
+    ALT.iter().fold(s.to_string(), |s, (k, v)| s.replace(k, v))
+}
 
 lazy_static! {
     //color to instruction operand size

@@ -1,12 +1,14 @@
+//! # Instruction Parser
+//! Parses each td element from webpage to produce an instruction struct
 use nom::{IResult, Err , branch::alt};
-use nom::sequence::{delimited, preceded, terminated, tuple};
+use nom::sequence::{delimited, preceded, pair, tuple};
 use nom::error::{VerboseError, VerboseErrorKind::Nom, ErrorKind};
-use nom::character::complete::{digit0, digit1, one_of, char as nomChar,  multispace0, multispace1};
-use nom::combinator::{all_consuming };
-use nom::bytes::complete::{tag};
-use nom::multi::{many_m_n, separated_list1, separated_list0};
+use nom::character::{complete::{digit0, digit1, one_of, char as nomChar,  multispace0, multispace1, alphanumeric1, alpha1}, is_alphanumeric};
+use nom::combinator::{all_consuming, recognize };
+use nom::bytes::complete::{tag, take_while, take_while1};
+use nom::multi::{many0_count, many1, separated_list0};
 
-use std::fmt;
+use std::{fmt, str};
 use serde::{Deserialize,Serialize};
 //use serde_derive::{Serialize, Deserialize};
 
@@ -64,6 +66,69 @@ fn parse_flags(i: &str) -> Res<&str, (char,char,char,char)> {
     let (i,(_,z,_, n, _,h, _,c,_)) = tuple((multispace0, flagZ, multispace1, flagN, multispace1, flagH, multispace1, flagC, multispace0))(i)?; 
 
     Ok((i,(z,n,h,c)))
+}
+
+fn parse_sp(i: &str) -> Res<&str,()> {
+    let (i,_) = many1(tag("&nbsp;"))(i)?;
+    Ok((i,()))
+}
+
+fn parse_nl(i: &str) -> Res<&str,()> {
+    let (i,_) = many1(tag("<br>"))(i)?;
+    Ok((i,()))
+}
+
+fn parse_operand(i: &str) -> Res<&str, String>{
+    let sym  = |c| {c == '-' || c == '(' || c ==')' || c == '+'};
+    let test = |c: char| {is_alphanumeric(c as u8) || sym(c) };
+    let (i, id) =  take_while1(test)(i)?; //()+-num/letter
+    Ok((i ,String::from(id)))
+}
+
+fn parse_mnemonic(i: &str) -> Res<&str, String>{
+    // pair(
+    //     alpha1,
+    //     many0_count(alphanumeric1))
+    // )
+    let (i,o) = recognize(
+        alphanumeric1)
+        (i)?;
+      Ok((i,String::from(o)))
+}
+
+fn parse_operands(i: &str) -> Res<&str, Vec<String>>{
+    delimited(multispace0, separated_list0( tag(","), parse_operand), multispace0)(i)
+}
+
+
+fn parse_inst(i:&str) -> Res<&str, (String,Vec<String>)> {
+    //! Returns both instruction name and operands
+    tuple((parse_mnemonic, parse_operands))(i) 
+}
+
+fn parse_timeline (i: &str) -> Res<&str, (usize, Time)> {
+    let (i, size) = digit1(i)?;
+    let (i, cycles) = preceded(many1(parse_sp), parse_time)(i)?;
+    Ok((i,(size.parse().unwrap(),cycles)))
+}
+
+pub fn parse_data (i:&str, code: u16, operand_size: usize) -> Res<&str, Instruction> {
+    let (i, ((inst,ops),_,(s,t),_,(z,n,h,c)) ) = all_consuming(tuple((parse_inst,parse_nl,parse_timeline,parse_nl,parse_flags)))(i)?;
+    let data = Instruction {
+        val: code,
+        operator: inst,
+        operands: ops,
+        instr_size: s,
+        instr_operand_size: operand_size,
+        time: t,
+        z: z,
+        h: h,
+        n: n,
+        c: c
+     };
+
+   Ok((i, data))
+  
 }
 
 
@@ -125,4 +190,33 @@ mod tests {
                 ]
             })));
     }
+
+    #[test]
+    fn parse_inst_test(){
+        println!("{:?}",parse_inst("LD DE,d16"));
+    }
+
+
+    #[test]
+    fn parse_line(){
+        println!("{:?}",parse_data("LD DE,d16<br>3&nbsp;&nbsp;12<br>- - - -",  5, 8));
+        assert_eq!(
+            parse_data("LD DE,d16<br>3&nbsp;&nbsp;12<br>- - - -",  5, 8),
+            Ok(("",Instruction {
+                z: '-',
+                h: '-',
+                n: '-',
+                c: '-',
+                time: Time::One(12),
+                instr_operand_size: 8,
+                instr_size: 3,
+                val: 5,
+                operator: String::from("LD"),
+                operands: vec! [String::from("DE"), String::from("d16")]
+            }))
+        )
+
+    }
+
+
 }

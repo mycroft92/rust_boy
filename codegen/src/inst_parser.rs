@@ -7,9 +7,7 @@ use nom::character::{complete::{ digit1,  char as nomChar,  multispace0, multisp
 use nom::combinator::{all_consuming, recognize };
 use nom::bytes::complete::{tag, take_while1};
 use nom::multi::{ many1, separated_list0};
-
 use std::{str};
-use log::info;
 use serde::{Deserialize,Serialize};
 //use serde_derive::{Serialize, Deserialize};
 
@@ -133,6 +131,7 @@ mod tests {
     use crate::inst_parser::*;
     use nom::error::{VerboseError, VerboseErrorKind::Nom, ErrorKind};
     use nom::Err;
+    use log::info;
     #[test]
     fn parse_flags0(){
         info!("{:?}",parse_flags(" - - - - "));

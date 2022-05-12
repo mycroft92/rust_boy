@@ -1,6 +1,6 @@
 //! # Fetch module
 //! We need functions to get the webpage, parse it and dump the instructions in yaml format
-//! Inspired by https://github.com/YushiOMOTE/rgy/blob/master/codegen/src/fetcher.rs 
+//! Lot of ideas from https://github.com/YushiOMOTE/rgy/blob/master/codegen/src/fetcher.rs 
 use curl::easy::Easy;
 use log::{info, debug};
 use scraper::{Html,Selector};

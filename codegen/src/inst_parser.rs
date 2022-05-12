@@ -6,7 +6,6 @@ use nom::combinator::{all_consuming };
 use nom::bytes::complete::{tag};
 use nom::multi::{many_m_n};
 
-use std::str;
 use std::fmt;
 use serde::{Deserialize,Serialize};
 //use serde_derive::{Serialize, Deserialize};

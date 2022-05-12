@@ -73,13 +73,13 @@ mod tests {
     #[test]
     fn parse_flags0(){
         println!("{:?}",parse_flags(" - - - - "));
-        assert_eq!(parse_flags(" - - - - "), Ok(("", Flags {z: '-', n: '-', h: '-', c:'-'})))
+        assert_eq!(parse_flags(" - - - - "), Ok(("", ('-',  '-',  '-', '-'))))
     }
 
     #[test]
     fn parse_flags1(){
         println!("{:?}",parse_flags(" Z 1 0 -"));
-        assert_eq!(parse_flags("Z 1 0 -"), Ok(("", Flags {z: 'Z', n: '1', h: '0', c:'-'})))
+        assert_eq!(parse_flags("Z 1 0 -"), Ok(("", ('Z',  '1',  '0', '-'))))
     }
 
     #[test]

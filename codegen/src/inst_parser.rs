@@ -4,7 +4,7 @@ use nom::error::{VerboseError, VerboseErrorKind::Nom, ErrorKind};
 use nom::character::complete::{digit0, digit1, one_of,  multispace0, multispace1};
 use nom::combinator::{all_consuming };
 use nom::bytes::complete::{tag};
-use nom::multi::{many_m_n};
+use nom::multi::{many_m_n, separated_list1, separated_list0};
 
 use std::fmt;
 use serde::{Deserialize,Serialize};
@@ -81,12 +81,14 @@ fn parse_time(i: &str) -> Res<&str,Time> {
 // }
 
 fn parse_flags(i: &str) -> Res<&str, Flags> {
-    let flag_sp = delimited(multispace0 ,one_of("ZNHC10-"), multispace1);
+    let flag_sp = separated_list1(tag(" "), one_of("ZNHC10-"));
     
-    let (i,o) = many_m_n(3, 3, terminated(flag_sp, multispace0))(i)?;
-    let (i,flag) = terminated(one_of("ZNHC10-"),multispace0)(i)?;
+    // let (i,o) = many_m_n(3, 3, terminated(flag_sp, multispace0))(i)?;
+    // let (i,flag) = terminated(one_of("ZNHC10-"),multispace0)(i)?;
+    let (i,flags) = flag_sp(i)?; 
+    if flags.len
     let flags = Flags {
-        z: *o.get(0).unwrap(),
+        z: *flags.get(0).unwrap(),
         n: *o.get(1).unwrap(),
         h: *o.get(2).unwrap(),
         c: flag,

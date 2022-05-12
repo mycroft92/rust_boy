@@ -30,25 +30,31 @@ lazy_static! {
 }
 
 fn parse_table(table: ElementRef, op_prefix: u16) -> Result<Vec<Instruction>,String> {
-    println!("Entry for 0 in hash is {}",INSTR_HASH.get("#ffcc99").unwrap());
+    debug!("Entry for 0 in hash is {}",INSTR_HASH.get("#ffcc99").unwrap());
 
     let td_selector = Selector::parse("td").map_err(|_e| {"Unable to find data in tables!"})?;
     let mut tds     = table.select(&td_selector); 
     let mut out = Vec::new();
-    let  (mut x, mut y) = (1,1); 
+    let  (mut x, mut y) = (0,0); 
     while let Some(td) = tds.next() {
-        let code = ((y-1 << 4) | (x-1)) as u16 | (op_prefix << 8); 
-        let line = td.inner_html();
-        //it's fine even if it doesn't parse
-        match parse_data( &line, code, *INSTR_HASH.get(td.value().attr("bgcolor").unwrap_or("")).unwrap_or(&0) ){
-            Ok((_,d)) => out.push(d),
-            Err(e)    => info!("Couldn't parse: {}", e.to_string())
-        };
-        println!("{:?} {}",td.value().attr("bgcolor"),td.inner_html());
+        //Skips headers
+        if x > 0 && y > 0 {
+            let code = ((y-1 << 4) | (x-1)) as u16 | (op_prefix << 8); 
+            let line = td.inner_html();
+            //it's fine even if it doesn't parse
+            match parse_data( &line, code, *INSTR_HASH.get(td.value().attr("bgcolor").unwrap_or("")).unwrap_or(&0) ){
+                Ok((_,d)) => {out.push(d.clone()); info!("Processed: code: {:#x}  Inst:{:?}", code, d)},
+                Err(e)    => info!("Couldn't parse: {} x: {} y: {}", e.to_string(), x, y )
+            };
+        }
+        debug!("Parsed: {:?} {}",td.value().attr("bgcolor"),td.inner_html());
         x = x+1;
-        if x % 17 == 0 {
+        if x > 16  {
+            x = 0;
             y = y+1;
         }
+        
+        
     }
 
     Ok(out)
@@ -87,8 +93,8 @@ pub fn fetch(url: String, fname: String) -> Result <(),String>  {
 
     let table1 = parse_table(tables.next().expect("No tables found!"), 0x0).map_err(|e| e.to_string())?; 
     let table2 = parse_table(tables.next().expect("No tables found!"), 0xCB).map_err(|e| e.to_string())?; 
-    println!("Table1: \n{:?}",table1);
-    println!("Table2: \n{:?}",table2);
+    debug!("Table1: \n{:?}",table1);
+    debug!("Table2: \n{:?}",table2);
 
     Ok(())     
 

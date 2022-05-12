@@ -6,11 +6,11 @@ extern crate lazy_static;
 
 use std::error::Error;
 use clap::Parser; // seems to be needed for arg parsing
-use log::LevelFilter;
+use log::{LevelFilter,info};
 use log4rs::append::console::ConsoleAppender;
 use log4rs::append::file::FileAppender;
 use log4rs::encode::pattern::PatternEncoder;
-use log4rs::config::{Appender, Config, Root};
+use log4rs::config::{Appender, Config, Logger, Root};
 use log4rs::filter::threshold::ThresholdFilter;
 
 mod fetch;
@@ -21,7 +21,7 @@ pub mod inst_parser;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let cli = crate::options::CMDArgs::parse();
-    println!("Args: {:?}",cli);
+    info!("Args: {:?}",cli);
 
     let stdout = ConsoleAppender::builder().build();
     let logfile = FileAppender::builder()
@@ -34,10 +34,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     let config = Config::builder()
         .appender(Appender::builder().build("logfile", Box::new(logfile)))
         .appender(Appender::builder().filter(Box::new(ThresholdFilter::new(LevelFilter::Info))).build("stdout",Box::new(stdout)))
+        .logger(Logger::builder().build("scraper", LevelFilter::Warn))
+        .logger(Logger::builder().build("curl", LevelFilter::Warn))
         .build(Root::builder()
                    .appender("logfile")
                    .appender("stdout")
-                   .build(LevelFilter::Debug))?;
+                   .build(LevelFilter::Info))?;
 
     log4rs::init_config(config)?;
     //Copy paste this stuff when you need to enable both console and file logging

@@ -9,6 +9,7 @@ use nom::bytes::complete::{tag, take_while1};
 use nom::multi::{ many1, separated_list0};
 
 use std::{str};
+use log::info;
 use serde::{Deserialize,Serialize};
 //use serde_derive::{Serialize, Deserialize};
 
@@ -134,25 +135,25 @@ mod tests {
     use nom::Err;
     #[test]
     fn parse_flags0(){
-        println!("{:?}",parse_flags(" - - - - "));
+        info!("{:?}",parse_flags(" - - - - "));
         assert_eq!(parse_flags(" - - - - "), Ok(("", ('-',  '-',  '-', '-'))))
     }
 
     #[test]
     fn parse_flags1(){
-        println!("{:?}",parse_flags(" Z 1 0 -"));
+        info!("{:?}",parse_flags(" Z 1 0 -"));
         assert_eq!(parse_flags("Z 1 0 -"), Ok(("", ('Z',  '1',  '0', '-'))))
     }
 
     #[test]
     fn parse_flags2(){
-        println!("{:?}",parse_flags("Z 10 - "));
+        info!("{:?}",parse_flags("Z 10 - "));
         assert!(parse_flags("Z 10 - ").is_err())
     }
 
     #[test]
     fn parse_flags3(){
-        println!("{:?}",all_consuming(parse_flags)(" Z H N C 1 0 "));
+        info!("{:?}",all_consuming(parse_flags)(" Z H N C 1 0 "));
         assert!(all_consuming(parse_flags)(" Z H N C 1 0 ").is_err())
     }
 
@@ -167,7 +168,7 @@ mod tests {
 
     #[test]
     fn parse_fail(){
-        println!("{:?}",parse_time("/31"));
+        info!("{:?}",parse_time("/31"));
         assert_eq!(parse_time("/31"), 
             Err(Err::Error(VerboseError {
                 errors: vec![
@@ -179,7 +180,7 @@ mod tests {
 
     #[test]
     fn parse_fail2(){
-        println!("{:?}",all_consuming(parse_time)("31/"));
+        info!("{:?}",all_consuming(parse_time)("31/"));
         assert_eq!(all_consuming(parse_time)("31/"), 
             Err(Err::Error(VerboseError {
                 errors: vec![
@@ -190,13 +191,13 @@ mod tests {
 
     #[test]
     fn parse_inst_test(){
-        println!("{:?}",parse_inst("LD DE,d16"));
+        info!("{:?}",parse_inst("LD DE,d16"));
     }
 
 
     #[test]
     fn parse_line(){
-        println!("{:?}",parse_data("LD DE,d16<br>3&nbsp;&nbsp;12<br>- - - -",  5, 8));
+        info!("{:?}",parse_data("LD DE,d16<br>3&nbsp;&nbsp;12<br>- - - -",  5, 8));
         assert_eq!(
             parse_data("LD DE,d16<br>3&nbsp;&nbsp;12<br>- - - -",  5, 8),
             Ok(("",Instruction {
@@ -217,7 +218,7 @@ mod tests {
 
     #[test]
     fn parse_line1() {
-        println!("{:?}",parse_data("LD A,(HL+)<br>1&nbsp;&nbsp;8<br>- - - -", 5,8));
+        info!("{:?}",parse_data("LD A,(HL+)<br>1&nbsp;&nbsp;8<br>- - - -", 5,8));
         assert!(parse_data("LD A,(HL+)<br>1&nbsp;&nbsp;8<br>- - - -",5,8).is_ok())
     }
 

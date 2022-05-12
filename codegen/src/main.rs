@@ -4,8 +4,6 @@ extern crate lazy_static;
 // #[macro_use]
 // extern crate pest_derive;
 
-use serde;
-use serde_yaml;
 use std::error::Error;
 use clap::Parser; // seems to be needed for arg parsing
 use log::LevelFilter;

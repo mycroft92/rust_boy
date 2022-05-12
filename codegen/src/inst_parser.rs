@@ -1,14 +1,14 @@
 //! # Instruction Parser
 //! Parses each td element from webpage to produce an instruction struct
-use nom::{IResult, Err , branch::alt};
-use nom::sequence::{delimited, preceded, pair, tuple};
-use nom::error::{VerboseError, VerboseErrorKind::Nom, ErrorKind};
-use nom::character::{complete::{digit0, digit1, one_of, char as nomChar,  multispace0, multispace1, alphanumeric1, alpha1}, is_alphanumeric};
+use nom::{IResult, branch::alt};
+use nom::sequence::{delimited, preceded, tuple};
+use nom::error::{VerboseError};
+use nom::character::{complete::{ digit1,  char as nomChar,  multispace0, multispace1, alphanumeric1}, is_alphanumeric};
 use nom::combinator::{all_consuming, recognize };
-use nom::bytes::complete::{tag, take_while, take_while1};
-use nom::multi::{many0_count, many1, separated_list0};
+use nom::bytes::complete::{tag, take_while1};
+use nom::multi::{ many1, separated_list0};
 
-use std::{fmt, str};
+use std::{str};
 use serde::{Deserialize,Serialize};
 //use serde_derive::{Serialize, Deserialize};
 
@@ -59,11 +59,11 @@ fn parse_time(i: &str) -> Res<&str,Time> {
 
 fn parse_flags(i: &str) -> Res<&str, (char,char,char,char)> {
 
-    let flagZ   = alt((nomChar('0'), nomChar('1'), nomChar('Z'), nomChar('-')));
-    let flagN   = alt((nomChar('0'), nomChar('1'), nomChar('N'), nomChar('-')));
-    let flagH   = alt((nomChar('0'), nomChar('1'), nomChar('H'), nomChar('-')));
-    let flagC   = alt((nomChar('0'), nomChar('1'), nomChar('C'), nomChar('-')));
-    let (i,(_,z,_, n, _,h, _,c,_)) = tuple((multispace0, flagZ, multispace1, flagN, multispace1, flagH, multispace1, flagC, multispace0))(i)?; 
+    let flag_z   = alt((nomChar('0'), nomChar('1'), nomChar('Z'), nomChar('-')));
+    let flag_n   = alt((nomChar('0'), nomChar('1'), nomChar('N'), nomChar('-')));
+    let flag_h   = alt((nomChar('0'), nomChar('1'), nomChar('H'), nomChar('-')));
+    let flag_c   = alt((nomChar('0'), nomChar('1'), nomChar('C'), nomChar('-')));
+    let (i,(_,z,_, n, _,h, _,c,_)) = tuple((multispace0, flag_z, multispace1, flag_n, multispace1, flag_h, multispace1, flag_c, multispace0))(i)?; 
 
     Ok((i,(z,n,h,c)))
 }
@@ -86,10 +86,6 @@ fn parse_operand(i: &str) -> Res<&str, String>{
 }
 
 fn parse_mnemonic(i: &str) -> Res<&str, String>{
-    // pair(
-    //     alpha1,
-    //     many0_count(alphanumeric1))
-    // )
     let (i,o) = recognize(
         alphanumeric1)
         (i)?;
@@ -127,14 +123,15 @@ pub fn parse_data (i:&str, code: u16, operand_size: usize) -> Res<&str, Instruct
         c: c
      };
 
-   Ok((i, data))
-  
+   Ok((i, data))  
 }
 
 
 #[cfg(test)]
 mod tests {
     use crate::inst_parser::*;
+    use nom::error::{VerboseError, VerboseErrorKind::Nom, ErrorKind};
+    use nom::Err;
     #[test]
     fn parse_flags0(){
         println!("{:?}",parse_flags(" - - - - "));
@@ -155,7 +152,7 @@ mod tests {
 
     #[test]
     fn parse_flags3(){
-        println!("{:?}",all_consuming(parse_flags)((" Z H N C 1 0 ")));
+        println!("{:?}",all_consuming(parse_flags)(" Z H N C 1 0 "));
         assert!(all_consuming(parse_flags)(" Z H N C 1 0 ").is_err())
     }
 
@@ -216,6 +213,12 @@ mod tests {
             }))
         )
 
+    }
+
+    #[test]
+    fn parse_line1() {
+        println!("{:?}",parse_data("LD A,(HL+)<br>1&nbsp;&nbsp;8<br>- - - -", 5,8));
+        assert!(parse_data("LD A,(HL+)<br>1&nbsp;&nbsp;8<br>- - - -",5,8).is_ok())
     }
 
 

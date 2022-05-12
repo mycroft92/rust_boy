@@ -1,7 +1,7 @@
 use nom::{IResult, Err , branch::alt};
-use nom::sequence::{delimited, preceded, terminated};
+use nom::sequence::{delimited, preceded, terminated, tuple};
 use nom::error::{VerboseError, VerboseErrorKind::Nom, ErrorKind};
-use nom::character::complete::{digit0, digit1, one_of,  multispace0, multispace1};
+use nom::character::complete::{digit0, digit1, one_of, char as nomChar,  multispace0, multispace1};
 use nom::combinator::{all_consuming };
 use nom::bytes::complete::{tag};
 use nom::multi::{many_m_n, separated_list1, separated_list0};
@@ -34,26 +34,6 @@ pub struct Instruction {
     pub c: char,
 }
 
-#[derive(Debug, PartialEq, Clone)]
-struct Flags {
-    z: char,
-    n: char,
-    h: char,
-    c: char
-}
-
-impl fmt::Display for Flags {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "z: {}, n: {},h: {}, c: {}", self.z, self.n, self.h, self.c)
-    }
-}
-
-impl Flags {
-    fn tuple(&self) -> (char, char, char, char) {
-        (self.z, self.n, self.h, self.c)
-    }
-}
-
  type Res<T,U> = IResult<T, U, VerboseError<T>>;
 
 
@@ -75,32 +55,16 @@ fn parse_time(i: &str) -> Res<&str,Time> {
     alt((two_parse, one_parse))(i)
 }
 
-// fn flag(i: &str) -> Res<&str, String> {
-//     let (i,f) = one_of("znhc10-")(i)?;
-//     Ok((i,String::from(f)))
-// }
+fn parse_flags(i: &str) -> Res<&str, (char,char,char,char)> {
 
-fn parse_flags(i: &str) -> Res<&str, Flags> {
-    let (i,flags) = delimited(multispace0, separated_list1(tag(" "), one_of("ZNHC10-")), multispace0)(i)?; 
-    //4 instances of FLAG with SPACE in between, optional SPACE at start and END
-    //let (i,flags) = terminated(many_m_n(4, 4, preceded(multispace0,  one_of("ZNHC10-"))),multispace0)(i)?; 
+    let flagZ   = alt((nomChar('0'), nomChar('1'), nomChar('Z'), nomChar('-')));
+    let flagN   = alt((nomChar('0'), nomChar('1'), nomChar('N'), nomChar('-')));
+    let flagH   = alt((nomChar('0'), nomChar('1'), nomChar('H'), nomChar('-')));
+    let flagC   = alt((nomChar('0'), nomChar('1'), nomChar('C'), nomChar('-')));
+    let (i,(_,z,_, n, _,h, _,c,_)) = tuple((multispace0, flagZ, multispace1, flagN, multispace1, flagH, multispace1, flagC, multispace0))(i)?; 
 
-    if flags.len() < 4 {
-        return Err(Err::Error(
-            VerboseError {
-                errors: vec! [(i, Nom(ErrorKind::ManyMN))]
-            }
-        ))
-    }
-    let flags = Flags {
-        z: *flags.get(0).unwrap(),
-        n: *flags.get(1).unwrap(),
-        h: *flags.get(2).unwrap(),
-        c: *flags.get(3).unwrap(),
-        };
-    Ok((i,flags))
+    Ok((i,(z,n,h,c)))
 }
-
 
 
 #[cfg(test)]
@@ -127,13 +91,7 @@ mod tests {
     #[test]
     fn parse_flags3(){
         println!("{:?}",all_consuming(parse_flags)((" Z H N C 1 0 ")));
-        assert!(all_consuming(parse_flags)((" Z H N C 1 0 ")).is_ok())
-        // assert_eq!(all_consuming(parse_flags)((" Z H N C 1 0 ")), 
-        //     Err(Err::Error(
-        //         VerboseError {
-        //             errors: vec! [(" 1 0 ", Nom(ErrorKind::ManyMN))]
-        //         }
-        //     )));
+        assert!(all_consuming(parse_flags)(" Z H N C 1 0 ").is_err())
     }
 
     #[test]

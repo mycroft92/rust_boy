@@ -62,7 +62,7 @@ fn parse_table(table: ElementRef, op_prefix: u16) -> Result<Vec<Instruction>,Str
             let code = ((y-1 << 4) | (x-1)) as u16 | (op_prefix << 8); 
             let line = td.inner_html();
             //it's fine even if it doesn't parse
-            match parse_data( &line, code, *INSTR_HASH.get(td.value().attr("bgcolor").unwrap_or("")).unwrap_or(&0) ){
+            match parse_data( &alter(&line), code, *INSTR_HASH.get(td.value().attr("bgcolor").unwrap_or("")).unwrap_or(&0) ){
                 Ok((_,d)) => {out.push(d.clone()); info!("Processed: code: {:#x}  Inst:{:?}", code, d)},
                 Err(e)    => info!("Couldn't parse: {} x: {} y: {}", e.to_string(), x, y )
             };

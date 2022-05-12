@@ -113,8 +113,8 @@ pub fn parse_data (i:&str, code: u16, operand_size: usize) -> Res<&str, Instruct
     let data = Instruction {
         val: code,
         val_hex: String::from(format!("{:#x}",code)),
-        operator: inst,
-        operands: ops,
+        operator: inst.to_lowercase(),
+        operands: ops.iter().map(|s| s.to_lowercase()).collect::<Vec<_>>(),
         instr_size: s,
         instr_operand_size: operand_size,
         time: t,

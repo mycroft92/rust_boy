@@ -110,7 +110,7 @@ pub fn fetch(url: String, fname: String) -> Result <(),String>  {
     let mut tables = document.select(&selector);
     let mut insts = Vec::new();
 
-    insts.extend(parse_table(tables.next().expect("No tables found!"), 0x0).map_err(|e| e.to_string())?); 
+    insts.extend(parse_table(tables.next().expect("No tables found!"), 0x00).map_err(|e| e.to_string())?); 
     insts.extend(parse_table(tables.next().expect("No tables found!"), 0xCB).map_err(|e| e.to_string())?); 
   
 

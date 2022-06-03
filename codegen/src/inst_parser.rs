@@ -211,8 +211,8 @@ mod tests {
                 instr_size: 3,
                 val: 5,
                 val_hex: String::from(format!("{:#x}",5)),
-                operator: String::from("LD"),
-                operands: vec! [String::from("DE"), String::from("d16")]
+                operator: String::from("ld"),
+                operands: vec! [String::from("de"), String::from("d16")]
             }))
         )
 

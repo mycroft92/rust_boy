@@ -2,6 +2,13 @@
 //     println!("Hello, world!");
 // }
 mod cpu;
+use log::{LevelFilter,info};
+use log4rs::append::console::ConsoleAppender;
+use log4rs::append::file::FileAppender;
+use log4rs::encode::pattern::PatternEncoder;
+use log4rs::config::{Appender, Config, Logger, Root};
+use log4rs::filter::threshold::ThresholdFilter;
+
 fn longest<'a>(a: &'a str, b: &'a str) -> &'a str {
     if a.len() > b.len() {
         return a;

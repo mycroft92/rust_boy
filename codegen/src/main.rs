@@ -13,7 +13,7 @@ use log4rs::filter::threshold::ThresholdFilter;
 
 mod fetch;
 mod options;
-pub mod inst_parser;
+mod inst_parser;
 //Setting up logging with log4rs
 
 
@@ -35,9 +35,9 @@ fn main() -> Result<(), Box<dyn Error>> {
         .logger(Logger::builder().build("scraper", LevelFilter::Warn))
         .logger(Logger::builder().build("curl", LevelFilter::Warn))
         .build(Root::builder()
-                   .appender("logfile")
-                   .appender("stdout")
-                   .build(LevelFilter::Info))?;
+                    .appender("logfile")
+                    .appender("stdout")
+                    .build(LevelFilter::Info))?;
 
     log4rs::init_config(config)?;
     //Copy paste this stuff when you need to enable both console and file logging

@@ -10,9 +10,31 @@ pub struct CPU {
     f: u8, //Flags
     h: u8,
     l: u8,
-    pc: u8, //program counter
-    sp: u8, //stack pointer
-    halt: bool,
+    pc: u16, //program counter
+    sp: u16, //stack pointer
+    halt: bool, //low power mode
+    im: bool, //interrupt manager
+    stop: bool //extra low power mode
+}
+
+impl Default for CPU {
+    fn default() -> CPU {
+        CPU {
+            a: 0,
+            b: 0,
+            c: 0,
+            d: 0,
+            e: 0,
+            f: 0,
+            h: 0,
+            l: 0,
+            pc: 0x0,
+            sp: 0x0,
+            halt: false,
+            im: true,
+            stop: false
+        }
+    } 
 }
 
 impl fmt::Display for CPU {

@@ -19,13 +19,14 @@ impl fmt::Display for CPU {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "a: {} 
+            "
+        a: {} 
         b: {}   c: {}
         d: {}   e: {}
         h: {}   l: {}
         sp: {}
         pc: {}
-        flags: Z {} N{} H{} C{} ",
+        flags: Z{} N{} H{} C{} ",
             self.a,
             self.b,
             self.c,
@@ -58,5 +59,16 @@ impl CPU {
 
     fn get_fc(&self) -> u8 {
         self.f & 0x1
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::cpu;
+
+    #[test]
+    fn showCPU() {
+        let cpu = cpu::CPU {a: 0, b: 0, c :0 , d: 0, e: 0, f: 0xF, h:0 , l:0, pc: 0x1,  sp: 0x5, halt: false };
+        println!("{}",cpu);
     }
 }

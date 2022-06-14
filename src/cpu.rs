@@ -37,6 +37,13 @@ impl Default for CPU {
     } 
 }
 
+fn bool_to_int(val: bool) -> u8 {
+    match val {
+        true => 1,
+        false => 0
+    }
+}
+
 impl fmt::Display for CPU {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
@@ -67,20 +74,55 @@ impl fmt::Display for CPU {
 }
 
 impl CPU {
-    fn get_fz(&self) -> u8 {
-        self.f & 0x80
+    fn get_fz(&self) -> bool {
+        self.f & 0x80 == 0x80
     }
 
-    fn get_fn(&self) -> u8 {
-        self.f & 0x40
+    fn get_fn(&self) -> bool {
+        self.f & 0x40 == 0x40
     }
 
-    fn get_fh(&self) -> u8 {
-        self.f & 0x20
+    fn get_fh(&self) -> bool {
+        self.f & 0x20 == 0x20
     }
 
-    fn get_fc(&self) -> u8 {
-        self.f & 0x1
+    fn get_fc(&self) -> bool {
+        self.f & 0x10 == 0x10
+    }
+
+    fn set_fz(&mut self, val: bool) {
+        if val {
+            self.f = self.f | 0x80;
+        } else {
+            self.f = self.f & 0x70;
+        }
+
+    }
+
+    fn set_fn(&mut self, val: bool) {
+        if val {
+            self.f = self.f | 0x40;
+        } else {
+            self.f = self.f & 0xB0;
+        }
+
+    }
+
+    fn set_fh(&mut self, val: bool) {
+        if val {
+            self.f = self.f | 0x20;
+        } else {
+            self.f = self.f & 0xD0;
+        }
+    }
+
+    fn set_fc(&mut self, val: bool) {
+        if val {
+            self.f = self.f | 0x10;
+        } else {
+            self.f = self.f & 0xE0;
+        }
+
     }
 }
 
@@ -89,8 +131,8 @@ mod test {
     use crate::cpu;
 
     #[test]
-    fn showCPU() {
-        let cpu = cpu::CPU {a: 0, b: 0, c :0 , d: 0, e: 0, f: 0xF, h:0 , l:0, pc: 0x1,  sp: 0x5, halt: false };
+    fn show_CPU() {
+        let cpu = cpu::CPU {a: 0, b: 0, c :0 , d: 0, e: 0, f: 0xF0, h:0 , l:0, pc: 0x1,  sp: 0x5, halt: false, im: true, stop: false };
         println!("{}",cpu);
     }
 }

@@ -4,7 +4,7 @@ use log;
 
 pub struct SimpleMMU {
     pub mem: [u8; 65536],
-    pub handlers: std::hash
+    //pub handlers: std::hash::Hash
 }
 
 pub enum MemValue {

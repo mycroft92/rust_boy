@@ -126,6 +126,10 @@ impl CPU {
     }
 }
 
+//Need to write a raw interpreter after finishing the instruction handler
+//TODO: finish CPU instruction handler
+//TODO: 
+
 #[cfg(test)]
 mod test {
     use crate::cpu;

@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 pub struct SimpleMMU {
     pub mem: [u8; 65536],
-    //pub handlers: HashMap<(u16,u16), MemHandler>
+    pub handlers: HashMap<(u16,u16), Box<dyn MemHandler>>
 }
 
 pub enum MemValue {
@@ -23,12 +23,18 @@ impl SimpleMMU {
     pub fn new() -> SimpleMMU {
         SimpleMMU {
             mem: [0u8; 65536],
-            //handlers: HashMap::new()
+            handlers: HashMap::new()
         }
     }
 
     pub fn get(&self, addr: u16) {
-
+        // let mut result = Vec::new();
+        // for k in self.handlers.keys() {
+        //     if k.0 <= addr && k.1 >= addr {
+        //         result.push(self.handlers[k])
+        //     } 
+        // }
+        
     }
 
     pub fn get8(&self, addr: usize) -> u8 {

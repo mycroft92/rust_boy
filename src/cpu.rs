@@ -49,12 +49,12 @@ impl fmt::Display for CPU {
         write!(
             f,
             "
-        a: {} 
-        b: {}   c: {}
-        d: {}   e: {}
-        h: {}   l: {}
-        sp: {}
-        pc: {}
+        a: [{:02x}] 
+        b: [{:02x}]   c: [{:02x}]
+        d: [{:02x}]   e: [{:02x}]
+        h: [{:02x}]   l: [{:02x}]
+        sp: [{:04x}]
+        pc: [{:04x}]
         flags: Z{} N{} H{} C{} ",
             self.a,
             self.b,
@@ -74,41 +74,39 @@ impl fmt::Display for CPU {
 }
 
 impl CPU {
-    fn get_fz(&self) -> bool {
+    pub fn get_fz(&self) -> bool {
         self.f & 0x80 == 0x80
     }
 
-    fn get_fn(&self) -> bool {
+    pub fn get_fn(&self) -> bool {
         self.f & 0x40 == 0x40
     }
 
-    fn get_fh(&self) -> bool {
+    pub fn get_fh(&self) -> bool {
         self.f & 0x20 == 0x20
     }
 
-    fn get_fc(&self) -> bool {
+    pub fn get_fc(&self) -> bool {
         self.f & 0x10 == 0x10
     }
 
-    fn set_fz(&mut self, val: bool) {
+    pub fn set_fz(&mut self, val: bool) {
         if val {
             self.f = self.f | 0x80;
         } else {
             self.f = self.f & 0x70;
         }
-
     }
 
-    fn set_fn(&mut self, val: bool) {
+    pub fn set_fn(&mut self, val: bool) {
         if val {
             self.f = self.f | 0x40;
         } else {
             self.f = self.f & 0xB0;
         }
-
     }
 
-    fn set_fh(&mut self, val: bool) {
+    pub fn set_fh(&mut self, val: bool) {
         if val {
             self.f = self.f | 0x20;
         } else {
@@ -116,14 +114,90 @@ impl CPU {
         }
     }
 
-    fn set_fc(&mut self, val: bool) {
+    pub fn set_fc(&mut self, val: bool) {
         if val {
             self.f = self.f | 0x10;
         } else {
             self.f = self.f & 0xE0;
         }
-
     }
+
+    pub fn get_bc(&self) -> u16 {
+        (self.b as u16) << 8 | (self.c as u16)
+    }
+
+    pub fn set_bc(&mut self, val: u16) {
+        self.b = (val >> 8) as u8;
+        self.c = val as u8;
+    }
+
+    pub fn get_de(&self) -> u16 {
+        (self.d as u16) << 8 | (self.e as u16)
+    }
+
+    pub fn set_de(&mut self, val: u16) {
+        self.d = (val >> 8) as u8;
+        self.e = val as u8;
+    }
+
+    pub fn get_hl(&self) -> u16 {
+        (self.h as u16) << 8 | (self.l as u16)
+    }
+
+    pub fn set_hl(&mut self, val: u16) {
+        self.h = (val >> 8) as u8;
+        self.l = val as u8;
+    }
+
+    pub fn set_a(&mut self, val: u8){
+        self.a = val
+    }
+
+    pub fn set_b(&mut self, val: u8){
+        self.b = val
+    }
+
+    pub fn set_c(&mut self, val: u8){
+        self.c = val
+    }
+
+    pub fn set_d(&mut self, val: u8){
+        self.d = val
+    }
+
+    pub fn set_e(&mut self, val: u8){
+        self.e = val
+    }
+
+    pub fn set_f(&mut self, val: u8){
+        self.f = val
+    }
+    
+    pub fn set_h(&mut self, val: u8){
+        self.h = val
+    }
+
+    pub fn set_l(&mut self, val: u8){
+        self.l = val
+    }
+
+    pub fn get_a(&self) -> u8 { self.a }
+    pub fn get_b(&self) -> u8 { self.b }
+    pub fn get_c(&self) -> u8 { self.c }
+    pub fn get_d(&self) -> u8 { self.d }
+    pub fn get_e(&self) -> u8 { self.e }
+    pub fn get_f(&self) -> u8 { self.f }
+    pub fn get_h(&self) -> u8 { self.h }
+    pub fn get_l(&self) -> u8 { self.l }
+    
+}
+
+//ALU implementation
+impl CPU {
+    pub fn add_e() {
+        
+    }
+
 }
 
 //Need to write a raw interpreter after finishing the instruction handler

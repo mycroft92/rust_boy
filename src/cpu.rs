@@ -194,8 +194,13 @@ impl CPU {
 
 //ALU implementation
 impl CPU {
-    pub fn add_e() {
-        
+    fn add(&mut self, value: u8) -> u8 {
+        let (new_value, did_overflow) = self.a.overflowing_add(value);
+        self.set_fz(if new_value == 0  {true} else {false});
+        self.set_fn(false);
+        self.set_fc(did_overflow);
+        self.set_fh((self.a & 0xF) + (value & 0xF) > 0xF );
+        new_value
     }
 
 }

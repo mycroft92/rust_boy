@@ -36,7 +36,7 @@ pub struct Instruction {
     pub c: char,
 }
 
- type Res<T,U> = IResult<T, U, VerboseError<T>>;
+type Res<T,U> = IResult<T, U, VerboseError<T>>;
 
 
 fn two_parse(input: &str) -> Res<&str, Time> {
@@ -89,7 +89,7 @@ fn parse_mnemonic(i: &str) -> Res<&str, String>{
     let (i,o) = recognize(
         alphanumeric1)
         (i)?;
-      Ok((i,String::from(o)))
+    Ok((i,String::from(o)))
 }
 
 fn parse_operands(i: &str) -> Res<&str, Vec<String>>{
@@ -122,9 +122,9 @@ pub fn parse_data (i:&str, code: u16, operand_size: usize) -> Res<&str, Instruct
         h: h,
         n: n,
         c: c
-     };
+    };
 
-   Ok((i, data))  
+    Ok((i, data))  
 }
 
 

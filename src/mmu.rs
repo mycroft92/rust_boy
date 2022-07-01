@@ -1,10 +1,10 @@
 
 use log;
-
+use std::collections::HashMap;
 
 pub struct SimpleMMU {
     pub mem: [u8; 65536],
-    pub handlers: std::hash<(u16,u16), mmu>
+    //pub handlers: HashMap<(u16,u16), MemHandler>
 }
 
 pub enum MemValue {
@@ -12,19 +12,42 @@ pub enum MemValue {
     Block,
     Replace(u8)
 }
-pub trait mmu {
-    ///returns byte data at a particular addr
-    fn get8(&self, addr: u16) -> u8;
-    ///sets byte data at a particular addr
-    fn set8(&mut self, addr: u16, val: u8);
+
+pub trait MemHandler {
+    fn on_read(&self, mmu: &SimpleMMU, addr: u16) -> MemValue;
+
+    fn on_write(&self, mmu: &SimpleMMU, addr: u16, value: u8) -> MemValue;
 }
 
-impl mmu for SimpleMMU {
-    fn get8(&self, addr) -> u8 {
+impl SimpleMMU {
+    pub fn new() -> SimpleMMU {
+        SimpleMMU {
+            mem: [0u8; 65536],
+            //handlers: HashMap::new()
+        }
+    }
+
+    pub fn get(&self, addr: u16) {
+
+    }
+
+    pub fn get8(&self, addr: usize) -> u8 {
         self.mem[addr]
     } 
 
-    fn set8(&mut self, addr: u16, val: u8) {
+    pub fn set8(&mut self, addr: usize, val: u8) {
         self.mem[addr] = val;
+    }
+
+    pub fn get16(&self, addr: usize) -> u16 {
+        let l = self.get8(addr);
+        let h = self.get8(addr+1);
+        (h as u16) << 8 | l as u16
+    } 
+
+    pub fn set16(&mut self, addr: usize, val: u16) {
+        self.set8(addr, val as u8);
+        self.set8(addr, (val >> 8) as u8)
+
     }
 }

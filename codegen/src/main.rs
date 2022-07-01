@@ -14,6 +14,7 @@ use log4rs::filter::threshold::ThresholdFilter;
 mod fetch;
 mod options;
 mod inst_parser;
+
 //Setting up logging with log4rs
 
 

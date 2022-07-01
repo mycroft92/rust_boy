@@ -2,6 +2,7 @@
 //     println!("Hello, world!");
 // }
 mod cpu;
+mod mmu;
 use log::{LevelFilter,info};
 use log4rs::append::console::ConsoleAppender;
 use log4rs::append::file::FileAppender;

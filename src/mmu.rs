@@ -7,6 +7,8 @@ pub struct SimpleMMU {
     pub handlers: HashMap<(u16,u16), Box<dyn MemHandler>>
 }
 
+/// We will use these later
+/// First we need a simple memory reading and writing, for executing sample programs
 pub enum MemValue {
     PassThrough,
     Block,

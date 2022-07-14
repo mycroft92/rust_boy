@@ -194,15 +194,27 @@ impl CPU {
 }
 
 //ALU implementation
-impl CPU {
-    fn add(&mut self, value: u8) -> u8 {
-        let (new_value, did_overflow) = self.a.overflowing_add(value);
-        self.set_fz(if new_value == 0  {true} else {false});
-        self.set_fn(false);
-        self.set_fc(did_overflow);
-        self.set_fh((self.a & 0xF) + (value & 0xF) > 0xF );
-        new_value
-    }
+//Should return, res and the flags as output
+// retursn res, half_carry, carry, zero in that order
+fn add8(r1: u8, r2: u8, c: bool) -> (u8, bool) {
+    let (r,c1) = r1.overflowing_add(r2) ;
+    let (r,c2) = if c {r.overflowing_add(1 as u8)} else {(r,c1)};
+    (r,c1 || c2)
+}
+
+fn sub8() {
+
+}
+
+fn add16(){
+
+}
+
+fn sub16(){
+
+}
+
+fn signed()  {
 
 }
 

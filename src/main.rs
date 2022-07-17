@@ -11,8 +11,8 @@ use log4rs::encode::pattern::PatternEncoder;
 use log4rs::config::{Appender, Config, Logger, Root};
 use log4rs::filter::threshold::ThresholdFilter;
 
-mod cpu;
 mod mmu;
+mod cpu;
 mod options;
 
 fn longest<'a>(a: &'a str, b: &'a str) -> &'a str {

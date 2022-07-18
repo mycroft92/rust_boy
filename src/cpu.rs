@@ -59,4 +59,5 @@ impl CPU {
     }
 }
 
-fn add8(p: u8, q: u8, c: u8) {}
+fn add8(p: u8, q: u8, c: u8) -> u8 {0}
+fn add16(p: u16, q: u16, c: u8) -> u16 {0}

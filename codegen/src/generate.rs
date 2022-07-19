@@ -12,6 +12,8 @@ use std::io::prelude::*;
 use tera::Tera;
 use tera::{to_value, try_get_value, Context, Value};
 use std::process::{Command};
+use std::env;
+use std::path::Path;
 
 pub fn hex(val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
     let val: u16 = try_get_value!("hex", "value", u16, val);
@@ -21,11 +23,16 @@ pub fn hex(val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
 
 lazy_static! {
     pub static ref TERA: Tera = {
-        let mut tera = match Tera::new("src/templates/**/*.rs") {
+        let workdir  = match env::var("GB_ROOT") {
+            Ok(x)  => String::from(x) + "/src/templates/**/*.rs",
+            Err(e) => String::from("src/templates/**/*.rs")
+        };
+
+        let mut tera = match Tera::new(&workdir) {
             Ok(t) => t,
             Err(e) => {
                 println!("Parsing error(s): {}", e);
-                ::std::process::exit(1);
+                std::process::exit(1);
             }
         };
         tera.register_filter("hex", hex);
@@ -42,8 +49,7 @@ pub fn generate(inst: &str, out: &str) -> tera::Result<()> {
     let mut context = Context::new();
     context.insert("insts", &insts);
 
-    //let tera = Tera::new("src/templates/**/*.rs").map_err(|e| {error!("Parsing error: {}",e);e})?;
-    //TERA.register_filter("hex", hex);
+    let  inst_path = String::from(out) + "/inst.rs";
 
     let output = match TERA.render("inst.rs", &context) {
         Ok(output) => output,
@@ -53,10 +59,11 @@ pub fn generate(inst: &str, out: &str) -> tera::Result<()> {
         }
     };
 
-    let mut o = File::create(out).expect(&format!("Cannot open {} for writing!", out));
+    let mut o = File::create(&inst_path).expect(&format!("Cannot open \"inst.rs\" in {} for writing!", out));
     write!(o, "{}", &output);
 
-    Command::new("rustfmt").args([out]).output().expect("Failed to execute rustfmt!");
+    //formats the file appropriately
+    Command::new("rustfmt").args([&inst_path]).output().expect("Failed to execute rustfmt!");
 
     let assembler = match TERA.render("assembler.rs", &context) {
         Ok(output) => output,
@@ -69,10 +76,13 @@ pub fn generate(inst: &str, out: &str) -> tera::Result<()> {
         }
     };
 
-    let mut o = File::create("assembler.rs").expect("Cannot open assembler.rs for writing!");
+    let  assm_path = String::from(out)+ "/assembler.rs";
+
+
+    let mut o = File::create(&assm_path).expect("Cannot open assembler.rs for writing!");
     write!(o, "{}", &assembler);
 
-    Command::new("rustfmt").args(["assembler.rs"]).output().expect("Failed to execute rustfmt!");
+    Command::new("rustfmt").args([&assm_path]).output().expect("Failed to execute rustfmt!");
 
     Ok(())
 }

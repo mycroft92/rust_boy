@@ -13,7 +13,7 @@ use tera::Tera;
 use tera::{to_value, try_get_value, Context, Value};
 use std::process::{Command};
 use std::env;
-use std::path::Path;
+
 
 pub fn hex(val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
     let val: u16 = try_get_value!("hex", "value", u16, val);

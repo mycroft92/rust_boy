@@ -2,3 +2,7 @@ target/
 Cargo.lock
 *.log
 *.yaml
+src/inst.rs
+src/assembler.rs
+inst.rs
+assembler.rs

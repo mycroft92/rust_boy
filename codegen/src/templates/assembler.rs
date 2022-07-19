@@ -28,5 +28,5 @@ pub fn assemble(code: &str) -> Option<u16> {
     let inst_str = String::from(inst)+" "+ops; 
     //We still miss certain alt instructions
     //Will add them in a later release
-    rev_map.get(inst_str)    
+    rev_map.get(&inst_str)    
 }

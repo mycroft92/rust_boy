@@ -55,6 +55,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         Ok(x)  => x,
         Err(e) => String::from(".") 
     };
+    println!("Running with GB_ROOT {}", out_path);
 
     let inst_list_path = if out_path == "." { String::from("instruction_list.yaml") } else {String::from(out_path.clone())+ "/codegen/instruction_list.yaml"};
 

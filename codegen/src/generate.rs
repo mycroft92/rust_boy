@@ -24,10 +24,10 @@ pub fn hex(val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
 lazy_static! {
     pub static ref TERA: Tera = {
         let workdir  = match env::var("GB_ROOT") {
-            Ok(x)  => String::from(x) + "/src/templates/**/*.rs",
+            Ok(x)  => String::from(x) + "/codegen/src/templates/**/*.rs",
             Err(e) => String::from("src/templates/**/*.rs")
         };
-
+        println!("Workdir for tera is {}",workdir);
         let mut tera = match Tera::new(&workdir) {
             Ok(t) => t,
             Err(e) => {
@@ -49,7 +49,7 @@ pub fn generate(inst: &str, out: &str) -> tera::Result<()> {
     let mut context = Context::new();
     context.insert("insts", &insts);
 
-    let  inst_path = String::from(out) + "/inst.rs";
+    let  inst_path = String::from(out) + "/src/inst.rs";
 
     let output = match TERA.render("inst.rs", &context) {
         Ok(output) => output,
@@ -76,9 +76,9 @@ pub fn generate(inst: &str, out: &str) -> tera::Result<()> {
         }
     };
 
-    let  assm_path = String::from(out)+ "/assembler.rs";
+    let  assm_path = String::from(out)+ "/src/assembler.rs";
 
-
+    println!("assm_path: {} inst_path: {}",assm_path, inst_path);
     let mut o = File::create(&assm_path).expect("Cannot open assembler.rs for writing!");
     write!(o, "{}", &assembler);
 

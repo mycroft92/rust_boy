@@ -21,7 +21,7 @@ impl CPU {
     fn decode (&mut self, arg: u16, code: u16, mmu: &mut MMU) -> (u8,u8) {
         match code {
             {%-for i in insts -%}
-            {{i.val_hex}} => op_{{i.val | hex}}(self, arg, code, mmu),
+            0x{{i.val | hex}} => op_{{i.val | hex}}(self, arg, code, mmu),
             {%endfor%}
         }
     }
@@ -32,11 +32,11 @@ impl CPU {
 
         if opcode == 0xcb {
             let next           = mmu.read8(self.regs.pc+1);
-            let (cycles, size) = self.decode(2/*2bytes read*/, next, mmu);
+            let (cycles, size) = self.decode(2/*2bytes read*/, (0xcb << 8) | (next as u16), mmu);
             self.set_pc(self.get_pc().wrapping_add(size));
             cycles
         } else {
-            let (cycles, size) = self.decode(1/*1byte read*/, opcode, mmu);
+            let (cycles, size) = self.decode(1/*1byte read*/, opcode as u16, mmu);
             self.set_pc(self.get_pc().wrapping_add(size));
             cycles
         }

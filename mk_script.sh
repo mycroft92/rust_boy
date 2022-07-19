@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /bin/bash
 
 export GB_ROOT=$PWD
 cd codegen

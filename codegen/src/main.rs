@@ -47,7 +47,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     log::info!("Hello, world!");
     //Run the fetch
-    //fetch::fetch(cli.url, cli.out)?;
-    generate::generate("instruction_list.yaml", "inst.rs");
+    log::info!("Running Fetch");
+    fetch::fetch(cli.url, cli.out)?;
+    log::info!("Running Generate");
+    let _ = generate::generate("instruction_list.yaml", "inst.rs");
     Ok(())
 }

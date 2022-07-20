@@ -1,6 +1,6 @@
 #[macro_use]
 extern crate lazy_static;
-extern crate tera;
+
 
 
 use std::error::Error;
@@ -11,6 +11,7 @@ use log4rs::append::file::FileAppender;
 use log4rs::encode::pattern::PatternEncoder;
 use log4rs::config::{Appender, Config, Logger, Root};
 use log4rs::filter::threshold::ThresholdFilter;
+use std::env;
 
 mod fetch;
 mod generate;
@@ -47,6 +48,17 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     log::info!("Hello, world!");
     //Run the fetch
+    log::info!("Running Fetch");
     fetch::fetch(cli.url, cli.out)?;
+    log::info!("Running Generate");
+    let out_path = match env::var("GB_ROOT") {
+        Ok(x)  => x,
+        Err(e) => String::from(".") 
+    };
+    println!("Running with GB_ROOT {}", out_path);
+
+    let inst_list_path = if out_path == "." { String::from("instruction_list.yaml") } else {String::from(out_path.clone())+ "/codegen/instruction_list.yaml"};
+
+    let _ = generate::generate(&inst_list_path, &out_path);
     Ok(())
 }

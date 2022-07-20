@@ -81,7 +81,7 @@ fn parse_nl(i: &str) -> Res<&str,()> {
 fn parse_operand(i: &str) -> Res<&str, String>{
     let sym  = |c| {c == '-' || c == '(' || c ==')' || c == '+'};
     let test = |c: char| {is_alphanumeric(c as u8) || sym(c) };
-    let (i, id) =  take_while1(test)(i)?; //()+-num/letter
+    let (i, id) =  delimited(multispace0,take_while1(test),multispace0)(i)?; //()+-num/letter
     Ok((i ,String::from(id)))
 }
 
@@ -96,8 +96,8 @@ fn parse_operands(i: &str) -> Res<&str, Vec<String>>{
     delimited(multispace0, separated_list0( tag(","), parse_operand), multispace0)(i)
 }
 
-
-fn parse_inst(i:&str) -> Res<&str, (String,Vec<String>)> {
+//Can use this in assembler
+pub fn parse_inst(i:&str) -> Res<&str, (String,Vec<String>)> {
     //! Returns both instruction name and operands
     tuple((parse_mnemonic, parse_operands))(i) 
 }
@@ -192,7 +192,8 @@ mod tests {
 
     #[test]
     fn parse_inst_test(){
-        info!("{:?}",parse_inst("LD DE,d16"));
+        println!("{:?}",parse_inst("LD DE, d16"));
+        info!("{:?}",parse_inst("LD DE, d16"));
     }
 
 

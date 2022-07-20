@@ -1,2 +1,8 @@
 /target
 *.lock
+*.log
+*.yaml
+
+src/inst.rs
+src/inst_parser.rs
+src/assembler.rs

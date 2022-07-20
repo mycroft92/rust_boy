@@ -3,7 +3,7 @@
 //! Read from instruction_list.yaml and generate the code in the following way:
 
 //! fn opcode_XX(&mut self, arg: u16, &mut MMU) -> (time, number of bytes consumed)
-use crate::inst_parser::{Instruction};
+use crate::inst_parser::{Instruction, Time};
 use log::{debug, error};
 use serde_yaml;
 use std::collections::HashMap;
@@ -21,6 +21,26 @@ pub fn hex(val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
     Ok(to_value(format!("{:04x}", val)).unwrap())
 }
 
+//https://meganesulli.com/generate-gb-opcodes/
+
+///If there's only one time unit return that else return the time unit corresponding to taking the branch
+fn time_cond_true(val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
+    let t = try_get_value!("time_cond_true", "value", Time, val);
+    match t {
+        Time::One(t)     => Ok(to_value(t).unwrap()),
+        Time::Two(tt,tf) => Ok(to_value(tt).unwrap())
+    }
+}
+
+///If there's only one time unit return that else return the time unit corresponding to NOT taking the branch
+fn time_cond_false(val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
+    let t = try_get_value!("time_cond_false", "value", Time, val);
+    match t {
+        Time::One(t)     => Ok(to_value(t).unwrap()),
+        Time::Two(tt,tf) => Ok(to_value(tf).unwrap())
+    }
+}
+
 lazy_static! {
     pub static ref TERA: Tera = {
         let workdir  = match env::var("GB_ROOT") {
@@ -29,13 +49,16 @@ lazy_static! {
         };
         println!("Workdir for tera is {}",workdir);
         let mut tera = match Tera::new(&workdir) {
-            Ok(t) => t,
+            Ok(t)  => t,
             Err(e) => {
                 println!("Parsing error(s): {}", e);
                 std::process::exit(1);
             }
         };
         tera.register_filter("hex", hex);
+        tera.register_filter("time_cond_true", time_cond_true);
+        tera.register_filter("time_cond_false", time_cond_false);
+        //To write getting and setting according to operands
         tera
     };
 }
@@ -48,12 +71,13 @@ pub fn generate(inst: &str, out: &str) -> tera::Result<()> {
     let insts: Vec<Instruction> = serde_yaml::from_reader(file).expect("Unpack error");
     let mut context = Context::new();
     context.insert("insts", &insts);
+    // insts always have 2 operands only, should be easy to handle
 
     let  inst_path = String::from(out) + "/src/inst.rs";
 
     let output = match TERA.render("inst.rs", &context) {
         Ok(output) => output,
-        Err(e) => {
+        Err(e)     => {
             error!("{:?}", e);
             return Err(e);
         }
@@ -67,11 +91,8 @@ pub fn generate(inst: &str, out: &str) -> tera::Result<()> {
 
     let assembler = match TERA.render("assembler.rs", &context) {
         Ok(output) => output,
-        Err(e) => {
+        Err(e)     => {
             error!("{:?}", e);
-            // for e in e.iter().skip(1) {
-            //     error!("Reason: {}", e);
-            // }
             return Err(e);
         }
     };

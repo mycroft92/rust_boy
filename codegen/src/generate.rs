@@ -23,6 +23,22 @@ pub fn hex(val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
 
 //https://meganesulli.com/generate-gb-opcodes/
 
+//given an operand, find the corresponding way to set that location (this is the target of the operation)
+fn dest_eval (val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
+    let val = try_get_value!("dest_eval", "value", String, val);
+    println!("Dest: {}",val);
+    Ok(to_value(val).unwrap())
+}
+
+//given an operand, find the corresponding way to get that location (this is the source of the operation)
+fn src_eval (val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
+    let val = try_get_value!("src_eval", "value", String, val);
+    println!("Src: {}",val);
+    Ok(to_value(val).unwrap())
+}
+
+
+
 ///If there's only one time unit return that else return the time unit corresponding to taking the branch
 fn time_cond_true(val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
     let t = try_get_value!("time_cond_true", "value", Time, val);
@@ -41,6 +57,8 @@ fn time_cond_false(val: & Value, _: & HashMap<String, Value>) -> tera::Result<Va
     }
 }
 
+
+
 lazy_static! {
     pub static ref TERA: Tera = {
         let workdir  = match env::var("GB_ROOT") {
@@ -58,6 +76,8 @@ lazy_static! {
         tera.register_filter("hex", hex);
         tera.register_filter("time_cond_true", time_cond_true);
         tera.register_filter("time_cond_false", time_cond_false);
+        tera.register_filter("dest_eval", dest_eval);
+        tera.register_filter("src_eval" , src_eval);
         //To write getting and setting according to operands
         tera
     };

@@ -139,6 +139,11 @@ impl CPU {
     {%- if i.operator == "nop" -%}
         {{ macros::nop(i=i) }}
     {%- endif -%}
+    {%set len = i.operands | length %}
+    {%if len  >= 2 %}
+        dest = {{i.operands[0] | dest_eval }}
+        src  = {{i.operands[1] | src_eval }}
+    {%endif%}
 
         ({{i.time | time_cond_false }}, {{i.instr_size}})
     }

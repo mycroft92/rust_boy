@@ -106,7 +106,7 @@ pub fn fetch(url: String, fname: String) -> Result <(),String>  {
     let document = Html::parse_document(&html);
     let selector = Selector::parse("table").map_err(|_e| {"Selecting tables failed"})?;
     //select the tables
-   
+    
     let mut tables = document.select(&selector);
     let mut insts = Vec::new();
 

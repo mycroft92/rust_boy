@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate lazy_static;
+extern crate tera;
 
 
 use std::error::Error;
@@ -12,6 +13,7 @@ use log4rs::config::{Appender, Config, Logger, Root};
 use log4rs::filter::threshold::ThresholdFilter;
 
 mod fetch;
+mod generate;
 mod options;
 mod inst_parser;
 

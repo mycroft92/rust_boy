@@ -9,10 +9,25 @@ use clap::Parser;
 pub struct CMDArgs {
     #[clap(long, short, default_value_t = String::from("https://www.pastraiser.com/cpu/gameboy/gameboy_opcodes.html"))]
     pub url: String,
+
+    #[clap(long, short)]
+    pub fetch: bool,
+
+    #[clap(long, short)]
+    pub gen:  bool,
+
+    #[clap(long)]
+    pub fetch_n_gen: bool,
+
+    #[clap(long, short, default_value_t = String::from("inst.rs"))]
+    pub rust_out: String,
+
     #[clap(long, short, default_value_t = String::from("instruction_list.yaml"))]
     pub out: String,
+
     #[clap(long, short, default_value_t = String::from("output.log"))]
     pub log: String,
+    
     #[clap(long, short)]
     pub debug: bool
 }

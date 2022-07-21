@@ -22,11 +22,19 @@ pub fn hex(val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
 }
 
 //https://meganesulli.com/generate-gb-opcodes/
+fn dest_help (v: str) -> String {
+    let search = vec!["a","b","c","d","e","f","h","l","pc","sp","bc","de","hl"];
+}
 
 //given an operand, find the corresponding way to set that location (this is the target of the operation)
 fn dest_eval (val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
     let val = try_get_value!("dest_eval", "value", String, val);
-    println!("Dest: {}",val);
+    println!("Dest: {} ",val);
+    match (& val).starts_with("(") {
+        true  => println!("yep {}", val.len()),
+        false => println!("nope {}", val.len())
+    };
+    
     Ok(to_value(val).unwrap())
 }
 

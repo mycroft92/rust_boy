@@ -22,8 +22,9 @@ pub fn hex(val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
 }
 
 //https://meganesulli.com/generate-gb-opcodes/
-fn dest_help (v: str) -> String {
+fn dest_help (v: &str) -> String {
     let search = vec!["a","b","c","d","e","f","h","l","pc","sp","bc","de","hl"];
+    String::from("")
 }
 
 //given an operand, find the corresponding way to set that location (this is the target of the operation)

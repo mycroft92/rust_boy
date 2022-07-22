@@ -118,7 +118,7 @@ impl CPU {
         self.regs.pc 
     }
 
-    pub fn get_a(&self) -> u8 { self.regs.a }
+    pub fn get_a(&self) -> u16 { self.regs.a }
     pub fn get_b(&self) -> u8 { self.regs.b }
     pub fn get_c(&self) -> u8 { self.regs.c }
     pub fn get_d(&self) -> u8 { self.regs.d }
@@ -141,8 +141,9 @@ impl CPU {
     {%- endif -%}
     {%set len = i.operands | length %}
     {%if len  >= 2 %}
-        dest = {{i.operands[0] | dest_eval }}
-        src  = {{i.operands[1] | src_eval }}
+        {{i.operands[1] | src_eval }}
+        {{i.operands[0] | dest_eval }} 
+        
     {%endif%}
 
         ({{i.time | time_cond_false }}, {{i.instr_size}})

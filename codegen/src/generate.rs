@@ -32,8 +32,13 @@ fn  is_mem <T: std::cmp::PartialEq> (k: T, v: Vec<T>) -> bool {
 //https://meganesulli.com/generate-gb-opcodes/
 fn dest_help (v: &str) -> String {
     let search = vec!["a","b","c","d","e","f","h","l","pc","sp","bc","de","hl"];
+    let bit16  = vec!["a16","a8"];
+    
     if is_mem(v, search) {
-        return String::from(v)
+        return String::from(v)+" what did I get "+ v
+    }
+    if is_mem(v, bit16) {
+        return String::from(&v[0..1])
     }
     String::new()
 }
@@ -42,11 +47,20 @@ fn dest_help (v: &str) -> String {
 //given an operand, find the corresponding way to set that location (this is the target of the operation)
 fn dest_eval (val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
     let val = try_get_value!("dest_eval", "value", String, val);
-    //println!("Dest: {} ",val);
-    //dest_help(&val);
+    let search = vec!["a","b","c","d","e","f","h","l","pc","sp","bc","de","hl"];
+
+    //fill the closing brace in macro along with arg
     let out = match (& val).starts_with("(") {
-        true  => format!( "mmu.write8(self.get_{}())", dest_help(&val[1..val.len()-1])),
-        false => format!( "self.set_{}()",dest_help(&val))
+        //We are assuming the instructions are correct in addressed mode
+        true  =>  { if is_mem(&val[1..val.len()-1], search) { 
+                        format!( "self.set_{}(v); \n self.set_pc(self.get_pc()+1);", val)
+                    } 
+                    else if &val[1..val.len()] == "a16"  
+                        {format!( "mmu.write16(self.get_a(), v); \n self.set_pc(self.get_pc()+2);")} 
+                    else {format!( "/*Default*/mmu.write8(self.get_a(),v);  \n self.set_pc(self.get_pc()+1); ")}
+                    
+                  },  // just take the first char, 
+        false =>  { if is_mem(&val[0..], search) { format!( "self.set_{}(v);", val)} else { val}} 
     };
     
     Ok(to_value(out).unwrap())
@@ -55,10 +69,35 @@ fn dest_eval (val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> 
 //given an operand, find the corresponding way to get that location (this is the source of the operation)
 fn src_eval (val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
     let val = try_get_value!("src_eval", "value", String, val);
-    //println!("Src: {}",val);
-    Ok(to_value(val).unwrap())
+    let search = vec!["a","b","c","d","e","f","h","l","pc","sp","bc","de","hl"];
+
+    //fill the closing brace in macro along with arg
+    let out = match (& val).starts_with("(") {
+        //We are assuming the instructions are correct in addressed mode
+        true  =>  { if is_mem(&val[1..val.len()-1], search) { 
+                        format!( " self.get_{}(", val)
+                    } 
+                    else if &val[1..val.len()-1] == "a16"  
+                        {format!( "let v: u16 = mmu.read16(self.get_a()); \n  self.set_pc(self.get_pc()+2);")} 
+                    else {format!( "/*Default true*/ let v = mmu.read8(self.get_a()) /*{} */; \n  self.set_pc(self.get_pc()+1);",val)}               
+                    
+                  },  // just take the first char, 
+        false =>  { if is_mem(&val[0..], search) { format!( "let v = self.get_{}();", val)} 
+                    else if &val[0..] == "d16" {format!( "let v: u16 = mmu.read16(self.get_pc()); \n  self.set_pc(self.get_pc()+2);")} 
+                    else if &val[0..] == "d8" {format!( "let v: u8 = mmu.read8(self.get_pc()); \n  self.set_pc(self.get_pc()+1);")} 
+                    else { val}} 
+    };
+    Ok(to_value(out).unwrap())
 }
 
+fn operand_eval (val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
+    match val {
+        tera::Value::Array(v)  => println!("{:?}",v),
+        tera::Value::String(s) => println!("{:?}",s),
+        _                     => println!("dont know bro {:?}", val)
+    };
+    Ok(to_value(val).unwrap())
+}
 
 
 ///If there's only one time unit return that else return the time unit corresponding to taking the branch
@@ -100,6 +139,7 @@ lazy_static! {
         tera.register_filter("time_cond_false", time_cond_false);
         tera.register_filter("dest_eval", dest_eval);
         tera.register_filter("src_eval" , src_eval);
+        tera.register_filter("operand_eval" , operand_eval);
         //To write getting and setting according to operands
         tera
     };
@@ -129,7 +169,7 @@ pub fn generate(inst: &str, out: &str) -> tera::Result<()> {
     write!(o, "{}", &output);
 
     //formats the file appropriately
-    Command::new("rustfmt").args([&inst_path]).output().expect("Failed to execute rustfmt!");
+    Command::new("rustfmt").args(["--force",&inst_path]).output().expect("Failed to execute rustfmt!");
 
     let assembler = match TERA.render("assembler.rs", &context) {
         Ok(output) => output,
@@ -145,7 +185,7 @@ pub fn generate(inst: &str, out: &str) -> tera::Result<()> {
     let mut o = File::create(&assm_path).expect("Cannot open assembler.rs for writing!");
     write!(o, "{}", &assembler);
 
-    Command::new("rustfmt").args([&assm_path]).output().expect("Failed to execute rustfmt!");
+    Command::new("rustfmt").args(["--force",&assm_path]).output().expect("Failed to execute rustfmt!");
 
     Ok(())
 }

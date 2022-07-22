@@ -15,6 +15,7 @@ use std::process::{Command};
 use std::env;
 
 
+
 pub fn hex(val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
     let val: u16 = try_get_value!("hex", "value", u16, val);
     debug!("Converted value from {} {}",val,format!("{:04x}", val));
@@ -32,22 +33,23 @@ fn  is_mem <T: std::cmp::PartialEq> (k: T, v: Vec<T>) -> bool {
 fn dest_help (v: &str) -> String {
     let search = vec!["a","b","c","d","e","f","h","l","pc","sp","bc","de","hl"];
     if is_mem(v, search) {
-        println!("Found dest {}", v);
+        return String::from(v)
     }
-    String::from("")
+    String::new()
 }
+
 
 //given an operand, find the corresponding way to set that location (this is the target of the operation)
 fn dest_eval (val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
     let val = try_get_value!("dest_eval", "value", String, val);
     //println!("Dest: {} ",val);
-    dest_help(&val);
-    // match (& val).starts_with("(") {
-    //     true  => println!("yep {}", val.len()),
-    //     false => println!("nope {}", val.len())
-    // };
+    //dest_help(&val);
+    let out = match (& val).starts_with("(") {
+        true  => format!( "mmu.write8(self.get_{}())", dest_help(&val[1..val.len()-1])),
+        false => format!( "self.set_{}()",dest_help(&val))
+    };
     
-    Ok(to_value(val).unwrap())
+    Ok(to_value(out).unwrap())
 }
 
 //given an operand, find the corresponding way to get that location (this is the source of the operation)

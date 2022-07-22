@@ -21,20 +21,31 @@ pub fn hex(val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
     Ok(to_value(format!("{:04x}", val)).unwrap())
 }
 
+fn  is_mem <T: std::cmp::PartialEq> (k: T, v: Vec<T>) -> bool {
+    for i in v.iter() {
+        if *i == k { return true }
+    }
+    false
+}
+
 //https://meganesulli.com/generate-gb-opcodes/
 fn dest_help (v: &str) -> String {
     let search = vec!["a","b","c","d","e","f","h","l","pc","sp","bc","de","hl"];
+    if is_mem(v, search) {
+        println!("Found dest {}", v);
+    }
     String::from("")
 }
 
 //given an operand, find the corresponding way to set that location (this is the target of the operation)
 fn dest_eval (val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
     let val = try_get_value!("dest_eval", "value", String, val);
-    println!("Dest: {} ",val);
-    match (& val).starts_with("(") {
-        true  => println!("yep {}", val.len()),
-        false => println!("nope {}", val.len())
-    };
+    //println!("Dest: {} ",val);
+    dest_help(&val);
+    // match (& val).starts_with("(") {
+    //     true  => println!("yep {}", val.len()),
+    //     false => println!("nope {}", val.len())
+    // };
     
     Ok(to_value(val).unwrap())
 }
@@ -42,7 +53,7 @@ fn dest_eval (val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> 
 //given an operand, find the corresponding way to get that location (this is the source of the operation)
 fn src_eval (val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
     let val = try_get_value!("src_eval", "value", String, val);
-    println!("Src: {}",val);
+    //println!("Src: {}",val);
     Ok(to_value(val).unwrap())
 }
 

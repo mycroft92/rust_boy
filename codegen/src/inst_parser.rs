@@ -22,6 +22,15 @@ pub enum Time {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[derive(PartialEq, Eq, Clone)]
+pub struct Flags{
+    pub z: char,
+    pub n: char,
+    pub h: char,
+    pub c: char,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[derive(PartialEq, Eq, Clone)]
 pub struct Instruction {
     pub val: u16,          //opcode in int
     pub val_hex: String,      //opcode in hex
@@ -30,10 +39,7 @@ pub struct Instruction {
     pub instr_size: usize, //0/8/16
     pub instr_operand_size: usize,
     pub time: Time,
-    pub z: char,
-    pub n: char,
-    pub h: char,
-    pub c: char,
+    pub flags: Flags
 }
 
 type Res<T,U> = IResult<T, U, VerboseError<T>>;
@@ -118,10 +124,10 @@ pub fn parse_data (i:&str, code: u16, operand_size: usize) -> Res<&str, Instruct
         instr_size: s,
         instr_operand_size: operand_size,
         time: t,
-        z: z,
-        h: h,
-        n: n,
-        c: c
+        flags: Flags {z: z,
+            h: h,
+            n: n,
+            c: c}
     };
 
     Ok((i, data))  
@@ -203,10 +209,10 @@ mod tests {
         assert_eq!(
             parse_data("LD DE,d16<br>3&nbsp;&nbsp;12<br>- - - -",  5, 8),
             Ok(("",Instruction {
-                z: '-',
+                flags: Flags {z: '-',
                 h: '-',
                 n: '-',
-                c: '-',
+                c: '-',},
                 time: Time::One(12),
                 instr_operand_size: 8,
                 instr_size: 3,

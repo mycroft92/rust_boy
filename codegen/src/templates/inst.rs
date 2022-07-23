@@ -135,9 +135,8 @@ impl CPU {
 /// `code` is the current opcode read so far
     #[allow(unused_variables)]
     fn op_{{i.val | hex }}(&mut self, code: u16, mmu: &mut MMU) -> (u8, u8) {
-        {%-raw-%}
-        debug!("Opcode: {}, State: {}",code, self);
-        {%- endraw -%}
+        {% raw %}debug!("Opcode: {}, State: {}",code, self);
+        {%- endraw-%}
     {%- if i.operator == "nop" -%}
         {{ macros::nop(i=i) }}
     {%- endif -%}
@@ -149,7 +148,10 @@ impl CPU {
     {%-if i.operator == "inc" -%}
         {{macros::inc(i=i)}}
     {%- endif-%}
-
+    {%-if i.operator == "dec" -%}
+        {{macros::dec(i=i)}}
+    {%- endif-%}
+        {{i.flags | set_flags }}
         ({{i.time | time_cond_false }}, {{i.instr_size}})
     }
 {%endfor %}

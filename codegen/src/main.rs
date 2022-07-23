@@ -48,8 +48,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     log::info!("Hello, world!");
     //Run the fetch
-    // log::info!("Running Fetch");
-    // fetch::fetch(cli.url, cli.out)?;
+    log::info!("Running Fetch");
+    fetch::fetch(cli.url, cli.out)?;
     log::info!("Running Generate");
     let out_path = match env::var("GB_ROOT") {
         Ok(x)  => x,

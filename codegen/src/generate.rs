@@ -3,7 +3,7 @@
 //! Read from instruction_list.yaml and generate the code in the following way:
 
 //! fn opcode_XX(&mut self, arg: u16, &mut MMU) -> (time, number of bytes consumed)
-use crate::inst_parser::{Instruction, Time};
+use crate::inst_parser::{Instruction, Time, Flags};
 use log::{debug, error};
 use serde_yaml;
 use std::collections::HashMap;
@@ -30,18 +30,18 @@ fn  is_mem <T: std::cmp::PartialEq> (k: T, v: Vec<T>) -> bool {
 }
 
 //https://meganesulli.com/generate-gb-opcodes/
-fn dest_help (v: &str) -> String {
-    let search = vec!["a","b","c","d","e","f","h","l","pc","sp","bc","de","hl"];
-    let bit16  = vec!["a16","a8"];
+// fn dest_help (v: &str) -> String {
+//     let search = vec!["a","b","c","d","e","f","h","l","pc","sp","bc","de","hl"];
+//     let bit16  = vec!["a16","a8"];
     
-    if is_mem(v, search) {
-        return String::from(v)+" what did I get "+ v
-    }
-    if is_mem(v, bit16) {
-        return String::from(&v[0..1])
-    }
-    String::new()
-}
+//     if is_mem(v, search) {
+//         return String::from(v)+" what did I get "+ v
+//     }
+//     if is_mem(v, bit16) {
+//         return String::from(&v[0..1])
+//     }
+//     String::new()
+// }
 
 
 //given an operand, find the corresponding way to set that location (this is the target of the operation)
@@ -57,9 +57,9 @@ fn dest_eval (val: & Value, map: & HashMap<String, Value>) -> tera::Result<Value
         true  =>  { if is_mem(&val[1..val.len()-1], search) { 
                         format!( "mmu.write{}(self.get_{}(),v); ", bits, &val[1..val.len()-1])
                     } 
-                    else if &val[1..val.len()] == "a16"  
+                    else if &val[1..val.len()-1] == "a16"  
                         {format!( "mmu.write{}(mem.read16(self.get_pc()), v); /*update pc by 2*/", bits )} 
-                    else {format!( "/*Default*/mmu.write{}(mem.read8(self.get_pc()) as u16,v);  /*update pc by 1*/", bits)} //a8 case
+                    else {format!( "/*Default*/mmu.write{}(mem.read{}(self.get_pc() as u16) ,v);  /*update pc by 1*/", bits, bits)} //a8 case
                     
                   },  // just take the first char, 
         false =>  { if is_mem(&val[0..], search) { format!( "self.set_{}(v);", val)} else { val}} 
@@ -69,16 +69,17 @@ fn dest_eval (val: & Value, map: & HashMap<String, Value>) -> tera::Result<Value
 }
 
 //given an operand, find the corresponding way to get that location (this is the source of the operation)
-fn src_eval (val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
+fn src_eval (val: & Value, map : & HashMap<String, Value>) -> tera::Result<Value> {
     let val = try_get_value!("src_eval", "value", String, val);
+    let bits = try_get_value!("dest_eval", "bits", u8, map.get("bits").unwrap());
     let search = vec!["a","b","c","d","e","f","h","l","pc","sp","bc","de","hl"];
     let immediate = vec!["a16","d16"];
-
+    //To handle (FF00h+a16) type instructions
     //fill the closing brace in macro along with arg
     let out = match (& val).starts_with("(") {
         //We are assuming the instructions are correct in addressed mode
         true  =>  { if is_mem(&val[1..val.len()-1], search) { 
-                        format!( " let v = mmu.read8(self.get_{}());  ", &val[1..val.len()-1])
+                        format!( " let v: u8 = mmu.read8(self.get_{}());  ", &val[1..val.len()-1])
                     } 
                     else if &val[1..val.len()-1] == "a8"  
                         {format!( "let v: u16 = mmu.read8(self.get_pc()); /*To update pc by 1*/")} 
@@ -86,7 +87,7 @@ fn src_eval (val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
                     else {error!("Unexpected operand! : {}", val);  val}               
                     
                   },  // just take the first char, 
-        false =>  { if is_mem(&val[0..], search) { format!( "let v = self.get_{}();", val)} 
+        false =>  { if is_mem(&val[0..], search) { format!( "let v: u{} = self.get_{}();", bits, val)} 
                     else if is_mem(&val[0..], immediate) {format!( "let v: u16 = mmu.read16(self.get_pc()); /*Update PC by 2*/")} 
                     else if &val[0..] == "d8" {format!( "let v: u8 = mmu.read8(self.get_pc()); /*Update PC by 1*/")} 
                     else {error!("Unexpected operand! : {}", val); val}} 
@@ -94,15 +95,23 @@ fn src_eval (val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
     Ok(to_value(out).unwrap())
 }
 
-fn operand_eval (val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
-    match val {
-        tera::Value::Array(v)  => println!("{:?}",v),
-        tera::Value::String(s) => println!("{:?}",s),
-        _                     => println!("dont know bro {:?}", val)
-    };
+// fn operand_eval (val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
+//     match val {
+//         tera::Value::Array(v)  => println!("{:?}",v),
+//         tera::Value::String(s) => println!("{:?}",s),
+//         _                     => println!("dont know bro {:?}", val)
+//     };
+//     Ok(to_value(val).unwrap())
+// }
+
+
+fn set_flag (val: & Value, map: & HashMap<String, Value>) -> tera::Result<Value> {
+    let val = try_get_value!("set_flag", "value", char, val);
+    let flag = try_get_value!("dest_eval", "flag", char, map.get("flag").unwrap());
+    if val == '-' { return Ok(to_value("").unwrap())}
+    else if val == '1' { }
     Ok(to_value(val).unwrap())
 }
-
 
 ///If there's only one time unit return that else return the time unit corresponding to taking the branch
 fn time_cond_true(val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
@@ -143,7 +152,7 @@ lazy_static! {
         tera.register_filter("time_cond_false", time_cond_false);
         tera.register_filter("dest_eval", dest_eval);
         tera.register_filter("src_eval" , src_eval);
-        tera.register_filter("operand_eval" , operand_eval);
+        tera.register_filter("set_flag" , set_flag);
         //To write getting and setting according to operands
         tera
     };

@@ -118,7 +118,7 @@ impl CPU {
         self.regs.pc 
     }
 
-    pub fn get_a(&self) -> u16 { self.regs.a }
+    pub fn get_a(&self) -> u8 { self.regs.a }
     pub fn get_b(&self) -> u8 { self.regs.b }
     pub fn get_c(&self) -> u8 { self.regs.c }
     pub fn get_d(&self) -> u8 { self.regs.d }
@@ -135,16 +135,20 @@ impl CPU {
 /// `code` is the current opcode read so far
     #[allow(unused_variables)]
     fn op_{{i.val | hex }}(&mut self, code: u16, mmu: &mut MMU) -> (u8, u8) {
-
+        {%-raw-%}
+        debug!("Opcode: {}, State: {}",code, self);
+        {%- endraw -%}
     {%- if i.operator == "nop" -%}
         {{ macros::nop(i=i) }}
     {%- endif -%}
-    {%set len = i.operands | length %}
-    {%if len  >= 2 %}
-        {{i.operands[1] | src_eval }}
-        {{i.operands[0] | dest_eval }} 
-        
-    {%endif%}
+    
+    {%-if i.operator == "ld" -%}
+        {{macros::ld(i=i)}}
+    {%- endif-%}
+
+    {%-if i.operator == "inc" -%}
+        {{macros::inc(i=i)}}
+    {%- endif-%}
 
         ({{i.time | time_cond_false }}, {{i.instr_size}})
     }
@@ -168,11 +172,11 @@ impl CPU {
             let next           = mmu.read8(self.regs.pc+1);
             self.set_pc(self.get_pc()+1); //increment the PC by 1 for the byte read
             let (cycles, size) = self.decode((0xcb << 8) | (next as u16), mmu);
-            //self.set_pc(self.get_pc().wrapping_add(size));
+            self.set_pc(self.get_pc().wrapping_add(size-2));
             cycles
         } else {
             let (cycles, size) = self.decode(opcode as u16, mmu);
-            //self.set_pc(self.get_pc().wrapping_add(size));
+            self.set_pc(self.get_pc().wrapping_add(size-1));
             cycles
         }
     }

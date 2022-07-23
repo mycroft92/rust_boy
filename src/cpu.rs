@@ -5,7 +5,7 @@ use crate::mmu::{*};
 //Registers of z80 CPU
 #[derive(Debug, Clone)]
 struct Registers {
-    a : u16,    //accumulator
+    a : u8,    //accumulator
     b : u8,
     c : u8,
     d : u8,
@@ -33,7 +33,7 @@ impl fmt::Display for Registers {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "a: [{:04x}],
+            "a: [{:02x}],
              b: [{:02x}],  c: [{:02x}]
              d: [{:02x}],  e: [{:02x}]
              f: [Z:{} N:{} H:{} C:{}]

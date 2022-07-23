@@ -45,19 +45,21 @@ fn dest_help (v: &str) -> String {
 
 
 //given an operand, find the corresponding way to set that location (this is the target of the operation)
-fn dest_eval (val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
+fn dest_eval (val: & Value, map: & HashMap<String, Value>) -> tera::Result<Value> {
     let val = try_get_value!("dest_eval", "value", String, val);
+    let bits = try_get_value!("dest_eval", "bits", u8, map.get("bits").unwrap());
     let search = vec!["a","b","c","d","e","f","h","l","pc","sp","bc","de","hl"];
+    //let immediate   = vec!["a16","d16"];
 
     //fill the closing brace in macro along with arg
     let out = match (& val).starts_with("(") {
         //We are assuming the instructions are correct in addressed mode
         true  =>  { if is_mem(&val[1..val.len()-1], search) { 
-                        format!( "self.set_{}(v); \n self.set_pc(self.get_pc()+1);", val)
+                        format!( "mmu.write{}(self.get_{}(),v); ", bits, &val[1..val.len()-1])
                     } 
                     else if &val[1..val.len()] == "a16"  
-                        {format!( "mmu.write16(self.get_a(), v); \n self.set_pc(self.get_pc()+2);")} 
-                    else {format!( "/*Default*/mmu.write8(self.get_a(),v);  \n self.set_pc(self.get_pc()+1); ")}
+                        {format!( "mmu.write{}(mem.read16(self.get_pc()), v); /*update pc by 2*/", bits )} 
+                    else {format!( "/*Default*/mmu.write{}(mem.read8(self.get_pc()) as u16,v);  /*update pc by 1*/", bits)} //a8 case
                     
                   },  // just take the first char, 
         false =>  { if is_mem(&val[0..], search) { format!( "self.set_{}(v);", val)} else { val}} 
@@ -70,22 +72,24 @@ fn dest_eval (val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> 
 fn src_eval (val: & Value, _: & HashMap<String, Value>) -> tera::Result<Value> {
     let val = try_get_value!("src_eval", "value", String, val);
     let search = vec!["a","b","c","d","e","f","h","l","pc","sp","bc","de","hl"];
+    let immediate = vec!["a16","d16"];
 
     //fill the closing brace in macro along with arg
     let out = match (& val).starts_with("(") {
         //We are assuming the instructions are correct in addressed mode
         true  =>  { if is_mem(&val[1..val.len()-1], search) { 
-                        format!( " self.get_{}(", val)
+                        format!( " let v = mmu.read8(self.get_{}());  ", &val[1..val.len()-1])
                     } 
-                    else if &val[1..val.len()-1] == "a16"  
-                        {format!( "let v: u16 = mmu.read16(self.get_a()); \n  self.set_pc(self.get_pc()+2);")} 
-                    else {format!( "/*Default true*/ let v = mmu.read8(self.get_a()) /*{} */; \n  self.set_pc(self.get_pc()+1);",val)}               
+                    else if &val[1..val.len()-1] == "a8"  
+                        {format!( "let v: u16 = mmu.read8(self.get_pc()); /*To update pc by 1*/")} 
+                    else if is_mem(&val[1..val.len()-1], immediate) {format!( "/*Default true*/ let v = mmu.read16(self.get_pc()) /*{} To update pc by 2 */; ",val)}
+                    else {error!("Unexpected operand! : {}", val);  val}               
                     
                   },  // just take the first char, 
         false =>  { if is_mem(&val[0..], search) { format!( "let v = self.get_{}();", val)} 
-                    else if &val[0..] == "d16" {format!( "let v: u16 = mmu.read16(self.get_pc()); \n  self.set_pc(self.get_pc()+2);")} 
-                    else if &val[0..] == "d8" {format!( "let v: u8 = mmu.read8(self.get_pc()); \n  self.set_pc(self.get_pc()+1);")} 
-                    else { val}} 
+                    else if is_mem(&val[0..], immediate) {format!( "let v: u16 = mmu.read16(self.get_pc()); /*Update PC by 2*/")} 
+                    else if &val[0..] == "d8" {format!( "let v: u8 = mmu.read8(self.get_pc()); /*Update PC by 1*/")} 
+                    else {error!("Unexpected operand! : {}", val); val}} 
     };
     Ok(to_value(out).unwrap())
 }

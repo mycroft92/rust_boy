@@ -127,6 +127,7 @@ impl CPU {
     pub fn get_h(&self) -> u8 { self.regs.h }
     pub fn get_l(&self) -> u8 { self.regs.l }
     
+    fn rotate() -> u8 {0}
 }
 
 impl CPU {
@@ -151,7 +152,7 @@ impl CPU {
     {%-if i.operator == "dec" -%}
         {{macros::dec(i=i)}}
     {%- endif-%}
-        {{i.flags | set_flags }}
+        {{i.flags  }}
         ({{i.time | time_cond_false }}, {{i.instr_size}})
     }
 {%endfor %}

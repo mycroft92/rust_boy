@@ -21,4 +21,7 @@
 {% endmacro %}
 
 {% macro rlca(i) %}
+    {{i.operands[0] | src_eval(bits=i.instr_operand_size)}}
+    let v = v.rotate_bro(v);
+    {{i.operands[0] | dest_eval(bits=i.instr_operand_size)}}
 {% endmacro %}

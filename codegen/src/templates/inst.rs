@@ -152,7 +152,10 @@ impl CPU {
     {%-if i.operator == "dec" -%}
         {{macros::dec(i=i)}}
     {%- endif-%}
-        {{i.flags  }}
+        {{i.flags.z | set_flag(flag="z")  }}
+        {{i.flags.n | set_flag(flag="n")  }}
+        {{i.flags.h | set_flag(flag="h")  }}
+        {{i.flags.c | set_flag(flag="c")  }}
         ({{i.time | time_cond_false }}, {{i.instr_size}})
     }
 {%endfor %}
